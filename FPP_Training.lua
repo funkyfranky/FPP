@@ -3,26 +3,54 @@
 -------------------------
 
 -- Switches if you want to include a rescue helo and/or a recovery tanker.
-local Traffic=false
 local Stennis=false
+local A2AD=false
+local Range=true
+local Warehouse=true
+local Fox=true
 
 -- No MOOSE settings menu.
 _SETTINGS:SetPlayerMenuOff()
 
 -- Active clients.
-local ClientSet = SET_CLIENT:New():FilterActive():FilterStart()
+--local ClientSet = SET_CLIENT:New():FilterActive():FilterStart()
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Zones
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+local zone={}
+
+zone.awacs=ZONE:New("Zone AWACS")  --Core.Zone#ZONE
+zone.kutaisirange=ZONE_POLYGON:NewFromGroupName("Kutaisi Range Zone")  --Core.Zone#ZONE_POLYGON
+zone.kobuletiXrange=ZONE:New("Zone Bombing Range Kobuleti X")  --Core.Zone#ZONE
+zone.kobuletiXbombtarget=ZONE:New("Zone Bomb Target Kobuleti X")  --Core.Zone#ZONE
+zone.SAMKrim=ZONE:New("Zone SAM Krim") --Core.Zone#ZONE
+zone.SAMKrymsk=ZONE:New("Zone SAM Krymsk")  --Core.Zone#ZONE
+zone.Maykop=ZONE:New("Zone Drone Maykop")   --Core.Zone#ZONE
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Practice Ranges
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local Range={}
+if Range then
 
-Range.Kutaisi=RANGE:New("Kutaisi")  --Functional.Range#RANGE
-Range.Kutaisi:SetRangeZone(ZONE_POLYGON:NewFromGroupName("Kutaisi Range Zone"))
-Range.Kutaisi:AddBombingTargetGroup(GROUP:FindByName("Kutaisi Unarmed Targets"), 50, true)
-Range.Kutaisi:AddBombingTargets({"loco"})
-Range.Kutaisi:Start()
+  local range={}
+  
+  range.Kutaisi=RANGE:New("Kutaisi")  --Functional.Range#RANGE
+  range.Kutaisi:SetRangeZone(zone.kutaisirange)
+  range.Kutaisi:AddBombingTargetGroup(GROUP:FindByName("Kutaisi Unarmed Targets"), 50, true)
+  --Range.Kutaisi:AddBombingTargets({"loco"})
+  range.Kutaisi:Start()
+  
+  range.KobuletiX=RANGE:New("Kobuleti X")  --Functional.Range#RANGE
+  range.KobuletiX:SetRangeZone(zone.kobuletiXrange)
+  range.KobuletiX:AddBombingTargetCoordinate(zone.kobuletiXbombtarget:GetCoordinate(), "Kobuleti X Bombing Target", 50)
+  range.KobuletiX:Start()
+
+end
+
+--[[
 
 local KutaisiGroup=GROUP:FindByName("Kutaisi Unarmed Targets")
 KutaisiGroup:HandleEvent(EVENTS.Dead)
@@ -33,17 +61,6 @@ local coord=KutaisiGroup:GetCoordinate()
 
 local loco=STATIC:FindByName("loco")
 loco:GetCoordinate():Explosion(5000,60)
-
-
-local eventhandler=EVENTHANDLER:New()
-eventhandler:HandleEvent(EVENTS.Dead)
-function eventhandler:OnEventDead(EventData)
-  EventData=EventData --Core.Event#EVENTDATA
-  env.info(string.format("FF Event dead for %s", tostring(EventData.IniUnitName)))
-  if EventData.IniUnitName=="loco" then
-    loco:ReSpawn(nil, 60)
-  end
-end
 
 function KutaisiGroup:OnEventDead(EventData)
   env.info(string.format("FF Unit count = %d", self:CountAliveUnits()))
@@ -61,69 +78,153 @@ function KutaisiGroup:OnEventDead(EventData)
     end
   end
 end
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Zones
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-local zone={}
-
-zone.awacs=ZONE:New("Zone AWACS")  --Core.Zone#ZONE
-
+]]
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Warehouses
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local warehouse={}
+if Warehouse then
 
-warehouse.kutaisi=WAREHOUSE:New(STATIC:FindByName("Warehouse Kutaisi")) --Functional.Warehouse#WAREHOUSE
-warehouse.kobuleti=WAREHOUSE:New(STATIC:FindByName("Warehouse Kobuleti")) --Functional.Warehouse#WAREHOUSE
-
-for _,_warehouse in pairs(warehouse) do
-  _warehouse:Start()
-end
-
-
-warehouse.kobuleti:AddAsset("E-3A Group", 2)
-warehouse.kobuleti:AddRequest(warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "E-3A Group", 1, nil, nil, nil, "AWACS")
-
-
-function warehouse.kobuleti:OnAfterSelfRequest(From,Event,To,groupset,request)
+  local warehouse={}
   
-  local assignment=self:GetAssignment(request)
+  warehouse.kutaisi  = WAREHOUSE:New(STATIC:FindByName("Warehouse Kutaisi"))  --Functional.Warehouse#WAREHOUSE
+  warehouse.kobuleti = WAREHOUSE:New(STATIC:FindByName("Warehouse Kobuleti")) --Functional.Warehouse#WAREHOUSE
+  warehouse.tbilisi  = WAREHOUSE:New(STATIC:FindByName("Warehouse Tbilisi"))  --Functional.Warehouse#WAREHOUSE
+  warehouse.maykop   = WAREHOUSE:New(STATIC:FindByName("Warehouse Maykop"))   --Functional.Warehouse#WAREHOUSE
+  warehouse.skala    = WAREHOUSE:New(STATIC:FindByName("Skala Command Post")) --Functional.Warehouse#WAREHOUSE
   
-  if assignment=="AWACS" then
-    for _,_group in pairs(groupset:GetSet()) do
-      local group=_group --Wrapper.Group#GROUP
-      
-      local speed=UTILS.KnotsToMps(300)
-      local altitude=UTILS.FeetToMeters(20000)
-      
-      local c1=zone.awacs:GetCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
-      local c2=c1:Translate(UTILS.NMToMeters(50), 310):SetAltitude(altitude)
-      
-      local taskAWACS=group:EnRouteTaskAWACS()
-      local taskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
-      
-      local wp={}
-      wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-      wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{taskAWACS, taskOrbit}, "AWACS")
-      
-      group:StartUncontrolled()
-      group:CommandEPLRS(true, 1)
-      group:OptionROTNoReaction()
-      group:Route(wp)
+  -- Start warehouses.
+  for _,_warehouse in pairs(warehouse) do
+    _warehouse:Start()
+  end
+  
+  -------------
+  -- Tbilisi --
+  -------------
+  
+  warehouse.tbilisi:AddAsset("C-130", 99)
+  warehouse.tbilisi:AddRequest(warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "C-130", 1, nil, nil, nil, "Transport")
+  
+  function warehouse.tbilisi:OnAfterAssetSpawned(From,Event,To,group,asset)
+    self:__AddRequest(10*60,warehouse.kobuleti,WAREHOUSE.Descriptor.GROUPNAME, "C-130", 1, nil, nil, nil, "Transport")
+  end
+
+  --------------
+  -- Kobuleti --
+  --------------
+  
+  warehouse.kobuleti:AddAsset("E-3A Group", 2)
+  warehouse.kobuleti:AddRequest(warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "E-3A Group", 1, nil, nil, nil, "AWACS")
+  
+  function warehouse.kobuleti:OnAfterSelfRequest(From,Event,To,groupset,request)
+    
+    local assignment=self:GetAssignment(request)
+    
+    if assignment=="AWACS" then
+      for _,_group in pairs(groupset:GetSet()) do
+        local group=_group --Wrapper.Group#GROUP
+        
+        local speed=UTILS.KnotsToMps(300)
+        local altitude=UTILS.FeetToMeters(20000)
+        
+        local c1=zone.awacs:GetCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
+        local c2=c1:Translate(UTILS.NMToMeters(50), 310):SetAltitude(altitude)
+        
+        local taskAWACS=group:EnRouteTaskAWACS()
+        local taskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
+        
+        local wp={}
+        wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
+        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{taskAWACS, taskOrbit}, "AWACS")
+        
+        group:StartUncontrolled()
+        group:CommandEPLRS(true, 1)
+        group:OptionROTNoReaction()
+        group:Route(wp)
+      end
     end
   end
+  
+  ------------
+  -- Maykop --
+  ------------
+  
+  warehouse.maykop:AddAsset("MiG-21 Group", 50)
+  warehouse.maykop:AddAsset("MiG-19 Group", 50)
+  
+  for i=1,10 do
+    warehouse.maykop:__AddRequest((i-1)*30, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, "MiG-21 Group", 1, nil, nil, nil, "Drone")
+  end
+  
+  function warehouse.maykop:OnAfterSelfRequest(From,Event,To,groupset,request)
+    
+    local assignment=self:GetAssignment(request)
+    
+    if assignment=="Drone" then
+      for _,_group in pairs(groupset:GetSet()) do
+        local group=_group --Wrapper.Group#GROUP
+        
+        local speed=UTILS.KnotsToMps(300)
+        local altitude=UTILS.FeetToMeters(10000)
+        
+        local c1=zone.Maykop:GetRandomCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
+        local c2=c1:Translate(UTILS.NMToMeters(10), 180):SetAltitude(altitude)
+                
+        local taskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
+        
+        local wp={}
+        wp[1]=warehouse.maykop:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
+        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{taskOrbit}, "Orbit")
+        
+        group:StartUncontrolled()
+        group:OptionROEHoldFire()
+        group:OptionROTNoReaction()
+        group:Route(wp)
+      end
+    end
+  end
+  
+  
+  --- Function called when all assets of a request were delivered.
+  function warehouse.maykop:OnAfterDelivered(From,Event,To,request)
+    local assignment=self:GetAssignment(request)
+    
+    -- Spawn new drone if one returned, e.g. because out of fuel.
+    if assignment=="Drone" then
+      warehouse.maykop:AddRequest(warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, asset.templatename, 1, nil, nil, nil, "Drone")
+    end
+  
+  end
+  
+  --- Function called when an asset group is dead.
+  function warehouse.maykop:OnAfterAssetDead(From,Event,To,_asset,_request)
+    local asset=_asset     --Functional.Warehouse#WAREHOUSE.Assetitem
+    local request=_request --Functional.Warehouse#WAREHOUSE.Queueitem
+    
+    -- Spawn new drone if one was shot down.
+    if request.assignment=="Drone" then
+      warehouse.maykop:AddRequest(warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, asset.templatename, 1, nil, nil, nil, "Drone")
+    end
+  end
+  
+  function warehouse.maykop:OnAfterAssetSpawned(From,Event,To,_group,_asset)
+    local group=_group --Wrapper.Group#GROUP
+    group:GetUnit(1):Explode(500, 5*60)
+  end
+  
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Missile Trainer
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- Fox2 missile trainer.
-local fox2=FOX2:New()
-fox2:Start()
+-- Fox missile trainer.
+if Fox then
+  fox=FOX:New()
+  fox:AddSafeZone(zone.SAMKrim)
+  fox:AddSafeZone(zone.SAMKrymsk)
+  fox:Start()
+end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Airboss USS Stennis
@@ -203,97 +304,97 @@ if Stennis then
   -- Start airboss class.
   AirbossStennis:Start()
   
-  --- Function called when recovery starts.
-  function AirbossStennis:OnAfterRecoveryStart(Event, From, To, Case, Offset)
-    env.info(string.format("Starting Recovery Case %d ops.", Case))
-  end
-  
-end
-
--- Spawn some AI flights as additional traffic.
-if Traffic then
-  local F181=SPAWN:New("FA-18C Group 1"):InitModex(111) -- Coming in from NW after  ~6 min
-  local F182=SPAWN:New("FA-18C Group 2"):InitModex(112) -- Coming in from NW after ~20 min
-  local F183=SPAWN:New("FA-18C Group 3"):InitModex(113) -- Coming in from W  after ~18 min
-  local F14=SPAWN:New("F-14B 2ship"):InitModex(211)   -- Coming in from SW after  ~4 min
-  local E2D=SPAWN:New("E-2D Group"):InitModex(311)    -- Coming in from NE after ~10 min
-  local S3B=SPAWN:New("S-3B Group"):InitModex(411)    -- Coming in from S  after ~16 min
-  
-  -- Spawn always 9 min before the recovery window opens.
-  local spawntimes={"8:51", "14:51", "20:51"}
-  for _,spawntime in pairs(spawntimes) do
-    local _time=UTILS.ClockToSeconds(spawntime)-timer.getAbsTime()
-    if _time>0 then
-      SCHEDULER:New(nil, F181.Spawn, {F181}, _time)
-      SCHEDULER:New(nil, F182.Spawn, {F182}, _time)
-      SCHEDULER:New(nil, F183.Spawn, {F183}, _time)
-      SCHEDULER:New(nil, F14.Spawn,  {F14},  _time)
-      SCHEDULER:New(nil, E2D.Spawn,  {E2D},  _time)
-      SCHEDULER:New(nil, S3B.Spawn,  {S3B},  _time)
-    end
-  end  
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- A2A Dispatcher
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- Define a SET_GROUP object that builds a collection of groups that define the EWR network.
--- Here we build the network with all the groups that have a name starting with DF CCCP AWACS and DF CCCP EWR.
-DetectionSetGroup=SET_GROUP:New()
-DetectionSetGroup:FilterPrefixes({"DF CCCP AWACS", "DF CCCP EWR"})
-DetectionSetGroup:FilterStart()
+if A2AD then
 
-Detection = DETECTION_AREAS:New( DetectionSetGroup, 30000 )
+  -- Define a SET_GROUP object that builds a collection of groups that define the EWR network.
+  -- Here we build the network with all the groups that have a name starting with DF CCCP AWACS and DF CCCP EWR.
+  DetectionSetGroup=SET_GROUP:New()
+  DetectionSetGroup:FilterPrefixes({"DF CCCP AWACS", "DF CCCP EWR"})
+  DetectionSetGroup:FilterStart()
+  
+  Detection = DETECTION_AREAS:New( DetectionSetGroup, 30000 )
+  
+  -- Setup the A2A dispatcher, and initialize it.
+  A2ADispatcher=AI_A2A_DISPATCHER:New(Detection)
+  
+  -- Enable the tactical display panel.
+  A2ADispatcher:SetTacticalDisplay(false)
+  
+  -- Initialize the dispatcher, setting up a border zone. This is a polygon, 
+  -- which takes the waypoints of a late activated group with the name CCCP Border as the boundaries of the border area.
+  -- Any enemy crossing this border will be engaged.
+  CCCPBorderZone = ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border"))
+  A2ADispatcher:SetBorderZone(CCCPBorderZone)
+  
+  -- Initialize the dispatcher, setting up a radius of 100km where any airborne friendly without an assignment within 100km radius from a detected target, will engage that target.
+  A2ADispatcher:SetEngageRadius(120000)
+  
+  -- Setup the squadrons.
+  A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27", "SQ CCCP SU-33", "SQ CCCP MIG-23MLD", "SQ CCCP MIG-25PD" }, 16)
+  A2ADispatcher:SetSquadron("Mozdok", AIRBASE.Caucasus.Mozdok, {"SQ CCCP MIG-31"}, 16)
+  
+  -- Setup the overhead
+  A2ADispatcher:SetSquadronOverhead("Mineralnye", 1.2)
+  A2ADispatcher:SetSquadronOverhead("Mozdok", 1)
+  
+  -- Setup the Grouping
+  A2ADispatcher:SetSquadronGrouping("Mineralnye", 2)
+  A2ADispatcher:SetSquadronGrouping("Mozdok", 2)
+  
+  -- Setup the Takeoff methods
+  A2ADispatcher:SetSquadronTakeoff("Mineralnye", AI_A2A_DISPATCHER.Takeoff.Hot)
+  A2ADispatcher:SetSquadronTakeoffFromRunway("Mozdok")
+  
+  -- Setup the Landing methods
+  A2ADispatcher:SetSquadronLandingAtRunway("Mineralnye")
+  A2ADispatcher:SetSquadronLandingAtEngineShutdown("Mozdok")
+  
+  -- CAP Squadron execution.
+  CAPZoneEast = ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName( "CAP Zone East" ))
+  A2ADispatcher:SetSquadronCap("Mineralnye", CAPZoneEast, 6000, 12000, 500, 600, 800, 1100, "BARO")
+  A2ADispatcher:SetSquadronCapInterval("Mineralnye", 3, 180, 360, 1)
+  
+  CAPZoneWest = ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West"))
+  A2ADispatcher:SetSquadronCap("Mozdok", CAPZoneWest, 6000, 12000, 600, 800, 800, 1200, "BARO")
+  A2ADispatcher:SetSquadronCapInterval("Mozdok", 3, 180, 360, 1)
+  
+  -- GCI Squadron execution.
+  A2ADispatcher:SetSquadronGci("Mineralnye", 900, 1200)
+  A2ADispatcher:SetSquadronGci("Mozdok", 900, 1200)
+  
+  -- Set the squadrons visible before startup.
+  --A2ADispatcher:SetSquadronVisible("Mineralnye")
+  --A2ADispatcher:SetSquadronVisible("Mozdok")
 
--- Setup the A2A dispatcher, and initialize it.
-A2ADispatcher=AI_A2A_DISPATCHER:New(Detection)
+end
 
--- Enable the tactical display panel.
-A2ADispatcher:SetTacticalDisplay(false)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Events
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- Initialize the dispatcher, setting up a border zone. This is a polygon, 
--- which takes the waypoints of a late activated group with the name CCCP Border as the boundaries of the border area.
--- Any enemy crossing this border will be engaged.
-CCCPBorderZone = ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border"))
-A2ADispatcher:SetBorderZone(CCCPBorderZone)
+-- General event handler.
+local eventhandler=EVENTHANDLER:New()
 
--- Initialize the dispatcher, setting up a radius of 100km where any airborne friendly without an assignment within 100km radius from a detected target, will engage that target.
-A2ADispatcher:SetEngageRadius(120000)
+-- Dead events.
+eventhandler:HandleEvent(EVENTS.Dead)
 
--- Setup the squadrons.
-A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27", "SQ CCCP SU-33", "SQ CCCP MIG-23MLD", "SQ CCCP MIG-25PD" }, 16)
-A2ADispatcher:SetSquadron("Mozdok", AIRBASE.Caucasus.Mozdok, {"SQ CCCP MIG-31"}, 16)
 
--- Setup the overhead
-A2ADispatcher:SetSquadronOverhead("Mineralnye", 1.2)
-A2ADispatcher:SetSquadronOverhead("Mozdok", 1)
+function eventhandler:OnEventDead(EventData)
+  EventData=EventData --Core.Event#EVENTDATA
+  
+  env.info(string.format("FF Event dead for %s", tostring(EventData.IniUnitName)))
+  if EventData.IniUnitName=="loco" then
+    loco:ReSpawn(nil, 60)
+  end
+  
+end
 
--- Setup the Grouping
-A2ADispatcher:SetSquadronGrouping("Mineralnye", 2)
-A2ADispatcher:SetSquadronGrouping("Mozdok", 2)
-
--- Setup the Takeoff methods
-A2ADispatcher:SetSquadronTakeoff("Mineralnye", AI_A2A_DISPATCHER.Takeoff.Hot)
-A2ADispatcher:SetSquadronTakeoffFromRunway("Mozdok")
-
--- Setup the Landing methods
-A2ADispatcher:SetSquadronLandingAtRunway("Mineralnye")
-A2ADispatcher:SetSquadronLandingAtEngineShutdown("Mozdok")
-
--- CAP Squadron execution.
-CAPZoneEast = ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName( "CAP Zone East" ))
-A2ADispatcher:SetSquadronCap("Mineralnye", CAPZoneEast, 6000, 12000, 500, 600, 800, 1100, "BARO")
-A2ADispatcher:SetSquadronCapInterval("Mineralnye", 3, 180, 360, 1)
-
-CAPZoneWest = ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West"))
-A2ADispatcher:SetSquadronCap("Mozdok", CAPZoneWest, 6000, 12000, 600, 800, 800, 1200, "BARO")
-A2ADispatcher:SetSquadronCapInterval("Mozdok", 3, 180, 360, 1)
-
--- GCI Squadron execution.
-A2ADispatcher:SetSquadronGci("Mineralnye", 900, 1200)
-A2ADispatcher:SetSquadronGci("Mozdok", 900, 1200)
-
--- Set the squadrons visible before startup.
---A2ADispatcher:SetSquadronVisible("Mineralnye")
---A2ADispatcher:SetSquadronVisible("Mozdok")
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
