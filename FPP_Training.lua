@@ -3,8 +3,8 @@
 -------------------------
 
 -- Switches if you want to include a rescue helo and/or a recovery tanker.
-local Stennis=false
-local A2AD=false
+local Stennis=true
+local A2AD=true
 local Range=true
 local Warehouse=true
 local Fox=true
@@ -23,11 +23,13 @@ local zone={}
 
 zone.awacs=ZONE:New("Zone AWACS")  --Core.Zone#ZONE
 zone.kutaisirange=ZONE_POLYGON:NewFromGroupName("Kutaisi Range Zone")  --Core.Zone#ZONE_POLYGON
+zone.kutaisiTechCombine=ZONE:New("Zone Kutaisi Range Tech Combine")  --Core.Zone#ZONE
 zone.kobuletiXrange=ZONE:New("Zone Bombing Range Kobuleti X")  --Core.Zone#ZONE
 zone.kobuletiXbombtarget=ZONE:New("Zone Bomb Target Kobuleti X")  --Core.Zone#ZONE
 zone.SAMKrim=ZONE:New("Zone SAM Krim") --Core.Zone#ZONE
 zone.SAMKrymsk=ZONE:New("Zone SAM Krymsk")  --Core.Zone#ZONE
 zone.Maykop=ZONE:New("Zone Drone Maykop")   --Core.Zone#ZONE
+zone.Skala=ZONE:New("Zone Skala FARP")   --Core.Zone#ZONE
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Practice Ranges
@@ -35,11 +37,12 @@ zone.Maykop=ZONE:New("Zone Drone Maykop")   --Core.Zone#ZONE
 
 if Range then
 
-  local range={}
+  range={}
   
   range.Kutaisi=RANGE:New("Kutaisi")  --Functional.Range#RANGE
   range.Kutaisi:SetRangeZone(zone.kutaisirange)
   range.Kutaisi:AddBombingTargetGroup(GROUP:FindByName("Kutaisi Unarmed Targets"), 50, true)
+  range.Kutaisi:AddBombingTargetCoordinate(coord,name,goodhitrange)
   --Range.Kutaisi:AddBombingTargets({"loco"})
   range.Kutaisi:Start()
   
@@ -85,7 +88,7 @@ end
 
 if Warehouse then
 
-  local warehouse={}
+  warehouse={}
   
   warehouse.kutaisi  = WAREHOUSE:New(STATIC:FindByName("Warehouse Kutaisi"))  --Functional.Warehouse#WAREHOUSE
   warehouse.kobuleti = WAREHOUSE:New(STATIC:FindByName("Warehouse Kobuleti")) --Functional.Warehouse#WAREHOUSE
@@ -149,11 +152,17 @@ if Warehouse then
   -- Maykop --
   ------------
   
-  warehouse.maykop:AddAsset("MiG-21 Group", 50)
-  warehouse.maykop:AddAsset("MiG-19 Group", 50)
+  local drones={"MiG-21 Group", "MiG-19 Group"}
+  
+  for _,drone in pairs(drones) do
+    warehouse.maykop:AddAsset(drone, 50)
+  end
+  
   
   for i=1,10 do
-    warehouse.maykop:__AddRequest((i-1)*30, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, "MiG-21 Group", 1, nil, nil, nil, "Drone")
+    local r=math.random(2)
+    local drone=drones[r]
+    warehouse.maykop:__AddRequest((i-1)*30, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
   end
   
   function warehouse.maykop:OnAfterSelfRequest(From,Event,To,groupset,request)
@@ -209,8 +218,32 @@ if Warehouse then
   
   function warehouse.maykop:OnAfterAssetSpawned(From,Event,To,_group,_asset)
     local group=_group --Wrapper.Group#GROUP
-    group:GetUnit(1):Explode(500, 5*60)
+    --group:GetUnit(1):Explode(500, 5*60)
   end
+  
+  -------------
+  -- FARP Skala --
+  -------------
+  
+  warehouse.skala:AddAsset("Infantry Rus Group 5", 20)
+  warehouse.skala:AddAsset("SA-18 Manpad Group", 20)
+  warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "Infantry Rus Group 5", 3, nil, nil, nil, "Patrol")
+  warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "SA-18 Manpad Group", 3, nil, nil, nil, "Patrol")
+  
+  function warehouse.skala:OnAfterSelfRequest(From,Event,To,groupset,request)
+    
+    local assignment=self:GetAssignment(request)
+    
+    if assignment=="Patrol" then
+      for _,_group in pairs(groupset:GetSet()) do
+        local group=_group --Wrapper.Group#GROUP
+        group:PatrolZones({zone.Skala}, group:GetSpeedMax()*0.5, "Custom")
+      end
+    end
+  end  
+  
+  --local gaz66=STATIC:FindByName("Skala GAZ-66")
+  --gaz66:GetCoordinate():Explosion(40, 10)
   
 end
 
@@ -379,21 +412,43 @@ end
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- General event handler.
-local eventhandler=EVENTHANDLER:New()
+eventhandler=EVENTHANDLER:New()
 
 -- Dead events.
 eventhandler:HandleEvent(EVENTS.Dead)
 
-
-function eventhandler:OnEventDead(EventData)
-  EventData=EventData --Core.Event#EVENTDATA
+function eventhandler:OnEventDead(_EventData)
+  EventData=_EventData --Core.Event#EVENTDATA
   
-  env.info(string.format("FF Event dead for %s", tostring(EventData.IniUnitName)))
-  if EventData.IniUnitName=="loco" then
-    loco:ReSpawn(nil, 60)
+  local unitname=EventData.IniUnitName
+  
+  env.info(string.format("FF Event dead for %s", tostring(unitname)))
+  
+  local static=STATIC:FindByName(unitname, false)
+  
+  -- Respawn all statics after 10 min.
+  if static then
+    static:ReSpawn(nil, 600)
+  end
+  
+  if unitname=="Kobuleti X Range Fuel Truck" then    
+    BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
   end
   
 end
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Scoring
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+local scoring=SCORING:New("FPP", "FPP-scoring.csv", true)
+scoring:SetMessagesDestroy(false)
+scoring:SetMessagesHit(false)
+scoring:SetMessagesZone(false)
+
+--scoring:AddZoneScore(zone.kobuletiXrange, 100)
+--scoring:AddStaticScore(ScoreStatic,Score)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
