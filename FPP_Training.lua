@@ -31,25 +31,142 @@ zone.SAMKrymsk=ZONE:New("Zone SAM Krymsk")  --Core.Zone#ZONE
 zone.Maykop=ZONE:New("Zone Drone Maykop")   --Core.Zone#ZONE
 zone.Skala=ZONE:New("Zone Skala FARP")   --Core.Zone#ZONE
 
+-----------------
+-- RADIO COMMS --
+-----------------
+
+-- Instructor radio frequency 305.00 MHz.
+local instructorfreq=305
+
+-- Range control radio frequency 264.00 MHz.
+local rangecontrolfreq=264
+
+-- Path in the miz where the sound files are located. Mind the "/" at the end!
+local path="Range Soundfiles/"
+
+-- Instructor radio on 305 MHz (AM is the default modulation but could be set via radio.modulation.FM as second parameter).
+local InstructorRadio=RADIOQUEUE:New(instructorfreq)
+
+-- Transmission are broadcasted from bombing range location.
+InstructorRadio:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
+
+-- Set parameters of numbers.
+InstructorRadio:SetDigit("0", "BR-N0.ogg", 0.40, path)
+InstructorRadio:SetDigit("1", "BR-N1.ogg", 0.25, path)
+InstructorRadio:SetDigit("2", "BR-N2.ogg", 0.37, path)
+InstructorRadio:SetDigit("3", "BR-N3.ogg", 0.37, path)
+InstructorRadio:SetDigit("4", "BR-N4.ogg", 0.39, path)
+InstructorRadio:SetDigit("5", "BR-N5.ogg", 0.39, path)
+InstructorRadio:SetDigit("6", "BR-N6.ogg", 0.40, path)
+InstructorRadio:SetDigit("7", "BR-N7.ogg", 0.40, path)
+InstructorRadio:SetDigit("8", "BR-N8.ogg", 0.37, path)
+InstructorRadio:SetDigit("9", "BR-N9.ogg", 0.40, path)
+
+-- Start radio queue.
+InstructorRadio:Start()
+
+
+-- Range control on 264 MHz.
+local RangeControl=RADIOQUEUE:New(rangecontrolfreq)
+
+-- Tranmission or broadcasted from bombing range location.
+RangeControl:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
+
+-- Set parameters of numbers.
+RangeControl:SetDigit("0", "BR-N0.ogg", 0.40, path)
+RangeControl:SetDigit("1", "BR-N1.ogg", 0.25, path)
+RangeControl:SetDigit("2", "BR-N2.ogg", 0.37, path)
+RangeControl:SetDigit("3", "BR-N3.ogg", 0.37, path)
+RangeControl:SetDigit("4", "BR-N4.ogg", 0.39, path)
+RangeControl:SetDigit("5", "BR-N5.ogg", 0.39, path)
+RangeControl:SetDigit("6", "BR-N6.ogg", 0.40, path)
+RangeControl:SetDigit("7", "BR-N7.ogg", 0.40, path)
+RangeControl:SetDigit("8", "BR-N8.ogg", 0.37, path)
+RangeControl:SetDigit("9", "BR-N9.ogg", 0.40, path)
+
+-- Start Radio queue.
+RangeControl:Start()
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Practice Ranges
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 if Range then
 
-  range={}
+  local range={}
   
   range.Kutaisi=RANGE:New("Kutaisi")  --Functional.Range#RANGE
   range.Kutaisi:SetRangeZone(zone.kutaisirange)
   range.Kutaisi:AddBombingTargetGroup(GROUP:FindByName("Kutaisi Unarmed Targets"), 50, true)
   range.Kutaisi:AddBombingTargetCoordinate(coord,name,goodhitrange)
-  --Range.Kutaisi:AddBombingTargets({"loco"})
   range.Kutaisi:Start()
   
   range.KobuletiX=RANGE:New("Kobuleti X")  --Functional.Range#RANGE
   range.KobuletiX:SetRangeZone(zone.kobuletiXrange)
   range.KobuletiX:AddBombingTargetCoordinate(zone.kobuletiXbombtarget:GetCoordinate(), "Kobuleti X Bombing Target", 50)
   range.KobuletiX:Start()
+  
+  for _,_myrange in pairs(range) do
+    local myrange=_myrange
+
+    --- Function called on each bomb impact.
+    function myrange:OnAfterImpact(From,Event,To,_result,_player)
+      local result=_result --Functional.Range#RANGE.BombResult
+      local player=_player --Functional.Range#RANGE.PlayerData
+    
+      -- Distance in feet.
+      local distance=UTILS.MetersToFeet(result.distance)
+      
+      -- Radial in degrees.
+      local radial=result.radial
+      
+      -- Text message to player only.
+      local text=string.format("Impact %03d° for %d ft.", radial, distance)
+      MESSAGE:New(text, 10):ToClient(player.client)
+      
+      -- Radio message.
+      RangeControl:NewTransmission("BR-Impact.ogg", 0.60, path)                  -- Duration of voice over is 0.60 sec.
+      RangeControl:Number2Transmission(string.format("%03d", radial), nil, 0.2)  -- 0.2 sec interval to prev transmission.
+      RangeControl:NewTransmission("BR-Degrees.ogg", 0.60, path)
+      RangeControl:NewTransmission("BR-For.ogg", 0.75, path)
+      RangeControl:Number2Transmission(string.format("%d", distance), nil, 0.2)  -- 0.2 sec interval to prev transmission.
+      RangeControl:NewTransmission("BR-Feet.ogg", 0.35, path)
+      
+    end
+    
+    --- Function called each time a player enters the bombing range zone.
+    function myrange:OnAfterEnterRange(From, Event, To, _player)
+      local player=_player --Functional.Range#RANGE.PlayerData
+    
+      -- Debug text message.
+      local text=string.format("You should now hear a radio message on %.2f MHz that you entered the bombing range and switch to %.2f MHz.", instructorfreq, rangecontrolfreq)
+      MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
+        
+      -- Range control radio frequency split.
+      local RF=UTILS.Split(string.format("%.2f", rangecontrolfreq), ".")
+      
+      -- Radio message that player entered the range
+      InstructorRadio:NewTransmission("BR-Enter.ogg", 4.60, path)
+      InstructorRadio:Number2Transmission(RF[1])
+      InstructorRadio:NewTransmission("BR-Point.ogg", 0.33, path)
+      InstructorRadio:Number2Transmission(RF[2])
+      
+    end
+    
+    --- Function called each time a player exists the bombing range zone.
+    function myrange:OnAfterExitRange(From, Event, To, _player)
+      local player=_player --Functional.Range#RANGE.PlayerData
+    
+      -- Debug text message.
+      local text=string.format("You should now hear a radio message on %.2f MHz that you left the bombing range.", rangecontrolfreq)
+      MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
+      
+      -- Radio message player left.
+      RangeControl:NewTransmission("BR-Exit.ogg", 2.80, path)
+    
+    end  
+  
+  end  
 
 end
 
@@ -221,9 +338,9 @@ if Warehouse then
     --group:GetUnit(1):Explode(500, 5*60)
   end
   
-  -------------
+  ----------------
   -- FARP Skala --
-  -------------
+  ----------------
   
   warehouse.skala:AddAsset("Infantry Rus Group 5", 20)
   warehouse.skala:AddAsset("SA-18 Manpad Group", 20)
@@ -351,7 +468,7 @@ if A2AD then
   DetectionSetGroup:FilterPrefixes({"DF CCCP AWACS", "DF CCCP EWR"})
   DetectionSetGroup:FilterStart()
   
-  Detection = DETECTION_AREAS:New( DetectionSetGroup, 30000 )
+  Detection = DETECTION_AREAS:New(DetectionSetGroup, 30000)
   
   -- Setup the A2A dispatcher, and initialize it.
   A2ADispatcher=AI_A2A_DISPATCHER:New(Detection)
@@ -373,8 +490,8 @@ if A2AD then
   A2ADispatcher:SetSquadron("Mozdok", AIRBASE.Caucasus.Mozdok, {"SQ CCCP MIG-31"}, 16)
   
   -- Setup the overhead
-  A2ADispatcher:SetSquadronOverhead("Mineralnye", 1.2)
-  A2ADispatcher:SetSquadronOverhead("Mozdok", 1)
+  A2ADispatcher:SetSquadronOverhead("Mineralnye", 1.0)
+  A2ADispatcher:SetSquadronOverhead("Mozdok", 1.0)
   
   -- Setup the Grouping
   A2ADispatcher:SetSquadronGrouping("Mineralnye", 2)
@@ -382,7 +499,7 @@ if A2AD then
   
   -- Setup the Takeoff methods
   A2ADispatcher:SetSquadronTakeoff("Mineralnye", AI_A2A_DISPATCHER.Takeoff.Hot)
-  A2ADispatcher:SetSquadronTakeoffFromRunway("Mozdok")
+  A2ADispatcher:SetSquadronTakeoff("Mozdok", AI_A2A_DISPATCHER.Takeoff.Hot)
   
   -- Setup the Landing methods
   A2ADispatcher:SetSquadronLandingAtRunway("Mineralnye")
@@ -418,23 +535,40 @@ eventhandler=EVENTHANDLER:New()
 eventhandler:HandleEvent(EVENTS.Dead)
 
 function eventhandler:OnEventDead(_EventData)
-  EventData=_EventData --Core.Event#EVENTDATA
+  local EventData=_EventData --Core.Event#EVENTDATA
   
+  -- Name of the dead unit.
   local unitname=EventData.IniUnitName
   
-  env.info(string.format("FF Event dead for %s", tostring(unitname)))
   
+  -- Debug
+  env.info(string.format("FPP Event dead for %s", tostring(unitname)))
+  
+  -- Try to find a static by this name.
   local static=STATIC:FindByName(unitname, false)
   
-  -- Respawn all statics after 10 min.
+  -- Check wheter a static or unit is dead.
   if static then
+  
+    -- Respawn all statics after 10 min. 
     static:ReSpawn(nil, 600)
-  end
+        
+  else
   
-  if unitname=="Kobuleti X Range Fuel Truck" then    
-    BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
-  end
+    -- Number of units in group still alive.
+    local nalive=EventData.IniGroup:CountAliveUnits()
+    
+    -- Debug.
+    env.info(string.format("FPP Units still alive %d", nalive))
   
+    -- Respawn Fuel truck on Kobuleti Range
+    if unitname=="Kobuleti X Range Fuel Truck" then    
+      BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
+    end
+  
+  
+  end
+    
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -442,7 +576,7 @@ end
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-local scoring=SCORING:New("FPP", "FPP-scoring.csv", true)
+local scoring=SCORING:New("FPP", "FPP-scoring.csv")
 scoring:SetMessagesDestroy(false)
 scoring:SetMessagesHit(false)
 scoring:SetMessagesZone(false)
