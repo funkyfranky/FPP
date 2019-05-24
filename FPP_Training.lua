@@ -170,52 +170,27 @@ if Range then
 
 end
 
---[[
-
-local KutaisiGroup=GROUP:FindByName("Kutaisi Unarmed Targets")
-KutaisiGroup:HandleEvent(EVENTS.Dead)
-
-local coord=KutaisiGroup:GetCoordinate()
-
---KutaisiGroup:GetUnit(1):Explode(5000, 60)
-
-local loco=STATIC:FindByName("loco")
-loco:GetCoordinate():Explosion(5000,60)
-
-function KutaisiGroup:OnEventDead(EventData)
-  env.info(string.format("FF Unit count = %d", self:CountAliveUnits()))
-  
-  local nalive=self:CountAliveUnits()
-  
-  if nalive==0 then
-    self:InitCoordinate(coord)
-    self:Respawn()
-    self:PatrolZones({Range.Kutaisi.rangezone}, self:GetSpeedMax()*0.1)
-  else
-    local u=self:GetFirstUnitAlive()
-    if u and u:IsAlive() then
-      --u:Explode(5000, 60)
-    end
-  end
-end
-]]
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Warehouses
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 if Warehouse then
 
-  warehouse={}
+  local warehouse={}
   
   warehouse.kutaisi  = WAREHOUSE:New(STATIC:FindByName("Warehouse Kutaisi"))  --Functional.Warehouse#WAREHOUSE
   warehouse.kobuleti = WAREHOUSE:New(STATIC:FindByName("Warehouse Kobuleti")) --Functional.Warehouse#WAREHOUSE
   warehouse.tbilisi  = WAREHOUSE:New(STATIC:FindByName("Warehouse Tbilisi"))  --Functional.Warehouse#WAREHOUSE
   warehouse.maykop   = WAREHOUSE:New(STATIC:FindByName("Warehouse Maykop"))   --Functional.Warehouse#WAREHOUSE
   warehouse.skala    = WAREHOUSE:New(STATIC:FindByName("Skala Command Post")) --Functional.Warehouse#WAREHOUSE
+  warehouse.beslan   = WAREHOUSE:New(STATIC:FindByName("Warehouse Beslan"))   --Functional.Warehouse#WAREHOUSE
+  warehouse.nalchik  = WAREHOUSE:New(STATIC:FindByName("Warehouse Nalchik"))  --Functional.Warehouse#WAREHOUSE
   
   -- Start warehouses.
   for _,_warehouse in pairs(warehouse) do
-    _warehouse:Start()
+    local wh=_warehouse --Functional.Warehouse#WAREHOUSE
+    wh:SetReportOff()
+    wh:Start()    
   end
   
   -------------
@@ -264,6 +239,46 @@ if Warehouse then
       end
     end
   end
+  
+  ------------
+  -- Beslan --
+  ------------
+  
+  warehouse.beslan:AddAsset("Mi-8 Group", 50)
+  
+  warehouse.beslan:__AddRequest(60, warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "Mi-8 Group", 1, nil, nil, nil, "Ferry Flight")
+
+
+  --- Function called when all assets of a request were delivered.
+  function warehouse.beslan:OnAfterDelivered(From,Event,To,_request)
+    local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem
+    local assignment=self:GetAssignment(request)
+    
+    -- Spawn new drone if one returned, e.g. because out of fuel.
+    if assignment=="Ferry Flight" then
+      self:AddRequest(warehouse.skala, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
+    end
+  end
+  
+  -------------
+  -- Nalchik --
+  -------------
+  
+  warehouse.nalchik:AddAsset("UAZ-469 Group", 50)
+  
+  warehouse.nalchik:__AddRequest(10, warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "UAZ-469 Group", 1, nil, nil, nil, "Traffic")
+
+
+  --- Function called when all assets of a request were delivered.
+  function warehouse.nalchik:OnAfterDelivered(From,Event,To,_request)
+    local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem
+    local assignment=self:GetAssignment(request)
+    
+    -- Spawn new drone if one returned, e.g. because out of fuel.
+    if assignment=="Traffic" then
+      self:AddRequest(warehouse.skala, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
+    end
+  end    
   
   ------------
   -- Maykop --
@@ -370,10 +385,32 @@ end
 
 -- Fox missile trainer.
 if Fox then
+  -- Constructor. Better to make this global so that the garbage collector does not deallocate it.
   fox=FOX:New()
+  
+  -- Add training zones.
   fox:AddSafeZone(zone.SAMKrim)
   fox:AddSafeZone(zone.SAMKrymsk)
+  
+  -- Add launch zones.
+  fox:AddLaunchZone(zone.SAMKrim)
+  fox:AddLaunchZone(zone.SAMKrymsk)
+  
+  fox:AddProtectedGroup(GROUP:FindByName("A-10 Target"))
+  
+  -- Start trainer.
   fox:Start()
+  
+  function fox:OnAfterEnterSafeZone(From,Event,To,_player)
+    local player=_player --Functional.Fox2#FOX.PlayerData
+    MESSAGE:New("You just entered a missile training zone."):ToClient(player.client)
+  end
+
+  function fox:OnAfterExitSafeZone(From,Event,To,_player)
+    local player=_player --Functional.Fox2#FOX.PlayerData
+    MESSAGE:New("You just left a missile training zone."):ToClient(player.client)
+  end
+  
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -482,7 +519,7 @@ if A2AD then
   CCCPBorderZone = ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border"))
   A2ADispatcher:SetBorderZone(CCCPBorderZone)
   
-  -- Initialize the dispatcher, setting up a radius of 100km where any airborne friendly without an assignment within 100km radius from a detected target, will engage that target.
+  -- Initialize the dispatcher, setting up a radius of 120 km where any airborne friendly without an assignment within 120 km radius from a detected target, will engage that target.
   A2ADispatcher:SetEngageRadius(120000)
   
   -- Setup the squadrons.
@@ -493,24 +530,24 @@ if A2AD then
   A2ADispatcher:SetSquadronOverhead("Mineralnye", 1.0)
   A2ADispatcher:SetSquadronOverhead("Mozdok", 1.0)
   
-  -- Setup the Grouping
+  -- Setup the Grouping.
   A2ADispatcher:SetSquadronGrouping("Mineralnye", 2)
   A2ADispatcher:SetSquadronGrouping("Mozdok", 2)
   
-  -- Setup the Takeoff methods
+  -- Setup the Takeoff methods.
   A2ADispatcher:SetSquadronTakeoff("Mineralnye", AI_A2A_DISPATCHER.Takeoff.Hot)
   A2ADispatcher:SetSquadronTakeoff("Mozdok", AI_A2A_DISPATCHER.Takeoff.Hot)
   
-  -- Setup the Landing methods
+  -- Setup the Landing methods.
   A2ADispatcher:SetSquadronLandingAtRunway("Mineralnye")
   A2ADispatcher:SetSquadronLandingAtEngineShutdown("Mozdok")
   
   -- CAP Squadron execution.
-  CAPZoneEast = ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName( "CAP Zone East" ))
+  CAPZoneEast = ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West"))
   A2ADispatcher:SetSquadronCap("Mineralnye", CAPZoneEast, 6000, 12000, 500, 600, 800, 1100, "BARO")
   A2ADispatcher:SetSquadronCapInterval("Mineralnye", 3, 180, 360, 1)
   
-  CAPZoneWest = ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West"))
+  CAPZoneWest = ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName("CAP Zone East"))
   A2ADispatcher:SetSquadronCap("Mozdok", CAPZoneWest, 6000, 12000, 600, 800, 800, 1200, "BARO")
   A2ADispatcher:SetSquadronCapInterval("Mozdok", 3, 180, 360, 1)
   
@@ -561,11 +598,15 @@ function eventhandler:OnEventDead(_EventData)
     -- Debug.
     env.info(string.format("FPP Units still alive %d", nalive))
   
-    -- Respawn Fuel truck on Kobuleti Range
-    if unitname=="Kobuleti X Range Fuel Truck" then    
+    -- Respawn Fuel truck on Kobuleti Range after 5 min.
+    if unitname=="Kobuleti X Range Fuel Truck" then
       BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
     end
-  
+    
+    -- Respawn SA-10 site after 10 min if one unit is dead.
+    if EventData.IniGroupName=="SA-10" then
+      BASE:ScheduleOnce(10*60, GROUP.Respawn, EventData.IniGroup)
+    end
   
   end
     
@@ -575,8 +616,7 @@ end
 -- Scoring
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-local scoring=SCORING:New("FPP", "FPP-scoring.csv")
+local scoring=SCORING:New("FPP", "FPP-Scoring.csv")
 scoring:SetMessagesDestroy(false)
 scoring:SetMessagesHit(false)
 scoring:SetMessagesZone(false)
