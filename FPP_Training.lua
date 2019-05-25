@@ -1,5 +1,6 @@
 -------------------------
 -- FPP Practice Script --
+-- v0.5 by funkyfranky --
 -------------------------
 
 -- Switches if you want to include a rescue helo and/or a recovery tanker.
@@ -12,24 +13,25 @@ local Fox=true
 -- No MOOSE settings menu.
 _SETTINGS:SetPlayerMenuOff()
 
--- Active clients.
---local ClientSet = SET_CLIENT:New():FilterActive():FilterStart()
-
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Zones
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 local zone={}
 
-zone.awacs=ZONE:New("Zone AWACS")  --Core.Zone#ZONE
-zone.kutaisirange=ZONE_POLYGON:NewFromGroupName("Kutaisi Range Zone")  --Core.Zone#ZONE_POLYGON
-zone.kutaisiTechCombine=ZONE:New("Zone Kutaisi Range Tech Combine")  --Core.Zone#ZONE
-zone.kobuletiXrange=ZONE:New("Zone Bombing Range Kobuleti X")  --Core.Zone#ZONE
-zone.kobuletiXbombtarget=ZONE:New("Zone Bomb Target Kobuleti X")  --Core.Zone#ZONE
+zone.awacs=ZONE:New("Zone AWACS") --Core.Zone#ZONE
+zone.tanker=ZONE:New("Zone Tanker") --Core.Zone#ZONE
+zone.kutaisirange=ZONE_POLYGON:NewFromGroupName("Kutaisi Range Zone") --Core.Zone#ZONE_POLYGON
+zone.kutaisiTechCombine=ZONE:New("Zone Kutaisi Range Tech Combine") --Core.Zone#ZONE
+zone.kobuletiXrange=ZONE:New("Zone Bombing Range Kobuleti X") --Core.Zone#ZONE
+zone.kobuletiXbombtarget=ZONE:New("Zone Bomb Target Kobuleti X") --Core.Zone#ZONE
 zone.SAMKrim=ZONE:New("Zone SAM Krim") --Core.Zone#ZONE
-zone.SAMKrymsk=ZONE:New("Zone SAM Krymsk")  --Core.Zone#ZONE
-zone.Maykop=ZONE:New("Zone Drone Maykop")   --Core.Zone#ZONE
-zone.Skala=ZONE:New("Zone Skala FARP")   --Core.Zone#ZONE
+zone.SAMKrymsk=ZONE:New("Zone SAM Krymsk") --Core.Zone#ZONE
+zone.Maykop=ZONE:New("Zone Drone Maykop") --Core.Zone#ZONE
+zone.Skala=ZONE:New("Zone Skala FARP") --Core.Zone#ZONE
+zone.CAPwest=ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West")) --Core.Zone#ZONE_POLYGON
+zone.CAPeast=ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName("CAP Zone East")) --Core.Zone#ZONE_POLYGON
+zone.CCCPboarder=ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border")) --Core.Zone#ZONE_POLYGON
 
 -----------------
 -- RADIO COMMS --
@@ -93,12 +95,13 @@ RangeControl:Start()
 
 if Range then
 
-  local range={}
+  -- Range Table.
+  range={}
   
   range.Kutaisi=RANGE:New("Kutaisi")  --Functional.Range#RANGE
   range.Kutaisi:SetRangeZone(zone.kutaisirange)
   range.Kutaisi:AddBombingTargetGroup(GROUP:FindByName("Kutaisi Unarmed Targets"), 50, true)
-  range.Kutaisi:AddBombingTargetCoordinate(coord,name,goodhitrange)
+  range.Kutaisi:AddBombingTargetCoordinate(zone.kutaisiTechCombine:GetCoordinate(), "Kutaisi Tech Combine", 50)
   range.Kutaisi:Start()
   
   range.KobuletiX=RANGE:New("Kobuleti X")  --Functional.Range#RANGE
@@ -198,6 +201,7 @@ if Warehouse then
   -------------
   
   warehouse.tbilisi:AddAsset("C-130", 99)
+  
   warehouse.tbilisi:AddRequest(warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "C-130", 1, nil, nil, nil, "Transport")
   
   function warehouse.tbilisi:OnAfterAssetSpawned(From,Event,To,group,asset)
@@ -207,39 +211,105 @@ if Warehouse then
   --------------
   -- Kobuleti --
   --------------
-  
-  warehouse.kobuleti:AddAsset("E-3A Group", 2)
-  warehouse.kobuleti:AddRequest(warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "E-3A Group", 1, nil, nil, nil, "AWACS")
-  
-  function warehouse.kobuleti:OnAfterSelfRequest(From,Event,To,groupset,request)
+
+  local function StartTanker(group)    
+    local speed=UTILS.KnotsToMps(300)
+    local altitude=UTILS.FeetToMeters(25000)
     
+    local c1=zone.tanker:GetCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
+    local c2=c1:Translate(UTILS.NMToMeters(50), 270):SetAltitude(altitude)
+    
+    -- Orbit in race track pattern.
+    local TaskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
+    
+    local wp={}
+    wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
+    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{TaskOrbit}, "Tanker")
+    
+    group:StartUncontrolled()
+            
+    local TaskRoute=group:TaskRoute(wp)
+    local TaskTanker=group:EnRouteTaskTanker()
+    local TaskCombo=group:TaskCombo({TaskTanker, TaskRoute})
+    
+    group:OptionROTNoReaction()
+    
+    group:SetTask(TaskCombo, 1)
+  end
+
+  local function StartAWACS(group)
+    local speed=UTILS.KnotsToMps(300)
+    local altitude=UTILS.FeetToMeters(20000)
+    
+    local c1=zone.awacs:GetCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
+    local c2=c1:Translate(UTILS.NMToMeters(50), 310):SetAltitude(altitude)
+    
+    -- Orbit in race track pattern.
+    local TaskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
+    
+    local wp={}
+    wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
+    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{TaskOrbit}, "AWACS")
+    
+    group:StartUncontrolled()
+            
+    local TaskRoute=group:TaskRoute(wp)
+    local TaskAWACS=group:EnRouteTaskAWACS()
+    local TaskCombo=group:TaskCombo({TaskAWACS, TaskRoute})
+    
+    group:OptionROTNoReaction()
+    group:CommandEPLRS(true, 1)
+    
+    group:SetTask(TaskCombo, 1)  
+  end
+  
+  -- Add assets.
+  warehouse.kobuleti:AddAsset("E-3A Group", 2)
+  warehouse.kobuleti:AddAsset("KC-135 Group", 2)
+  
+  warehouse.kobuleti:SetLowFuelThreshold(0.95)
+  
+  -- Self request AWACS.
+  warehouse.kobuleti:__AddRequest(10, warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "E-3A Group", 1, nil, nil, nil, "AWACS")
+  
+  -- Self request tanker.
+  warehouse.kobuleti:__AddRequest(20, warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "KC-135 Group", 1, nil, nil, nil, "Tanker")
+  
+  --- Function called after self requests.
+  function warehouse.kobuleti:OnAfterSelfRequest(From,Event,To,groupset,_request)
+    local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem    
     local assignment=self:GetAssignment(request)
     
     if assignment=="AWACS" then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
         
-        local speed=UTILS.KnotsToMps(300)
-        local altitude=UTILS.FeetToMeters(20000)
-        
-        local c1=zone.awacs:GetCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
-        local c2=c1:Translate(UTILS.NMToMeters(50), 310):SetAltitude(altitude)
-        
-        local taskAWACS=group:EnRouteTaskAWACS()
-        local taskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
-        
-        local wp={}
-        wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{taskAWACS, taskOrbit}, "AWACS")
-        
-        group:StartUncontrolled()
-        group:CommandEPLRS(true, 1)
-        group:OptionROTNoReaction()
-        group:Route(wp)
+        StartAWACS(group)
       end
     end
+    
+    if assignment=="Tanker" then
+      for _,_group in pairs(groupset:GetSet()) do
+        local group=_group --Wrapper.Group#GROUP
+        
+        StartTanker(group)
+      end
+    end    
+    
   end
   
+  --- Function called when a group runs out of fuel.
+  function warehouse.kobuleti:OnAfterAssetLowFuel(From,Event,To,asset,_request)
+    local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem    
+    local assignment=self:GetAssignment(request)
+    
+    -- Send a new tanker or AWACS once the other runs out of fuel.
+    if assignment=="AWACS" or assignment=="Tanker" then
+      warehouse.kobuleti:AddRequest(warehouse.kobuleti, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
+    end
+    
+  end
+    
   ------------
   -- Beslan --
   ------------
@@ -318,8 +388,11 @@ if Warehouse then
         wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{taskOrbit}, "Orbit")
         
         group:StartUncontrolled()
+        
+        -- Drone: Hold fire and dont react to threats!
         group:OptionROEHoldFire()
         group:OptionROTNoReaction()
+        
         group:Route(wp)
       end
     end
@@ -357,10 +430,14 @@ if Warehouse then
   -- FARP Skala --
   ----------------
   
+  -- Add assets.
   warehouse.skala:AddAsset("Infantry Rus Group 5", 20)
   warehouse.skala:AddAsset("SA-18 Manpad Group", 20)
+  
+  -- Spawn some infantry and manpads.
   warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "Infantry Rus Group 5", 3, nil, nil, nil, "Patrol")
   warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "SA-18 Manpad Group", 3, nil, nil, nil, "Patrol")
+  
   
   function warehouse.skala:OnAfterSelfRequest(From,Event,To,groupset,request)
     
@@ -426,7 +503,7 @@ if Stennis then
   local tanker=RECOVERYTANKER:New("USS Stennis", "S-3B Tanker Group")
   tanker:SetTakeoffAir()
   tanker:SetRadio(250)
-  tanker:SetModex(511)
+  tanker:SetModex(501)
   tanker:SetTACAN(1, "TKR")
   tanker:Start()
   
@@ -437,7 +514,7 @@ if Stennis then
   awacs:SetAltitude(20000)
   awacs:SetCallsign(CALLSIGN.AWACS.Wizard)
   awacs:SetRacetrackDistances(30, 15)
-  awacs:SetModex(611)
+  awacs:SetModex(601)
   awacs:SetTACAN(2, "WIZ")
   awacs:__Start(1)
   
@@ -461,10 +538,10 @@ if Stennis then
   local window3=AirbossStennis:AddRecoveryWindow("21:00", "22:00", 3,  30, true, 21)
   
   -- Load all saved player grades from your "Saved Games\DCS" folder (if lfs was desanitized).
-  AirbossStennis:Load()
+  AirbossStennis:Load(nil, "FPP-Greenieboard.csv")
   
   -- Automatically save player results to your "Saved Games\DCS" folder each time a player get a final grade from the LSO.
-  AirbossStennis:SetAutoSave()
+  AirbossStennis:SetAutoSave(nil, "FPP-Greenieboard.csv")
   
   AirbossStennis:SetRadioRelayLSO(rescuehelo:GetUnitName())
   AirbossStennis:SetRadioRelayMarshal("Huey Radio Relay")
@@ -477,7 +554,7 @@ if Stennis then
   AirbossStennis:SetExcludeAI(CarrierExcludeSet)
   
   -- Enable trap sheet.
-  AirbossStennis:SetTrapSheet()
+  AirbossStennis:SetTrapSheet(nil, "FPP-Trapsheet")
    
   -- Single carrier menu optimization.
   AirbossStennis:SetMenuSingleCarrier()
@@ -513,18 +590,16 @@ if A2AD then
   -- Enable the tactical display panel.
   A2ADispatcher:SetTacticalDisplay(false)
   
-  -- Initialize the dispatcher, setting up a border zone. This is a polygon, 
-  -- which takes the waypoints of a late activated group with the name CCCP Border as the boundaries of the border area.
-  -- Any enemy crossing this border will be engaged.
-  CCCPBorderZone = ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border"))
-  A2ADispatcher:SetBorderZone(CCCPBorderZone)
+  -- Initialize the dispatcher, setting up a border zone. Any enemy crossing this border will be engaged.  
+  A2ADispatcher:SetBorderZone(zone.CCCPboarder)
   
   -- Initialize the dispatcher, setting up a radius of 120 km where any airborne friendly without an assignment within 120 km radius from a detected target, will engage that target.
   A2ADispatcher:SetEngageRadius(120000)
   
   -- Setup the squadrons.
-  A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27", "SQ CCCP SU-33", "SQ CCCP MIG-23MLD", "SQ CCCP MIG-25PD" }, 16)
-  A2ADispatcher:SetSquadron("Mozdok", AIRBASE.Caucasus.Mozdok, {"SQ CCCP MIG-31"}, 16)
+  --A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27", "SQ CCCP MIG-23MLD", "SQ CCCP MIG-25PD" }, 16)
+  A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27"},  32)
+  A2ADispatcher:SetSquadron("Mozdok",     AIRBASE.Caucasus.Mozdok,          {"SQ CCCP MIG-31"}, 32)
   
   -- Setup the overhead
   A2ADispatcher:SetSquadronOverhead("Mineralnye", 1.0)
@@ -536,20 +611,20 @@ if A2AD then
   
   -- Setup the Takeoff methods.
   A2ADispatcher:SetSquadronTakeoff("Mineralnye", AI_A2A_DISPATCHER.Takeoff.Hot)
-  A2ADispatcher:SetSquadronTakeoff("Mozdok", AI_A2A_DISPATCHER.Takeoff.Hot)
+  A2ADispatcher:SetSquadronTakeoff("Mozdok",     AI_A2A_DISPATCHER.Takeoff.Hot)
   
   -- Setup the Landing methods.
-  A2ADispatcher:SetSquadronLandingAtRunway("Mineralnye")
+  A2ADispatcher:SetSquadronLandingAtEngineShutdown("Mineralnye")
   A2ADispatcher:SetSquadronLandingAtEngineShutdown("Mozdok")
   
-  -- CAP Squadron execution.
-  CAPZoneEast = ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West"))
-  A2ADispatcher:SetSquadronCap("Mineralnye", CAPZoneEast, 6000, 12000, 500, 600, 800, 1100, "BARO")
-  A2ADispatcher:SetSquadronCapInterval("Mineralnye", 3, 180, 360, 1)
+  -- CAP: Two groups patrolling zone CAP west.
+  A2ADispatcher:SetSquadronCap("Mineralnye", zone.CAPwest, 6000, 12000, 500, 600, 800, 1100, "BARO")
+  A2ADispatcher:SetSquadronCapInterval("Mineralnye", 2, 180, 360, 1)
   
-  CAPZoneWest = ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName("CAP Zone East"))
-  A2ADispatcher:SetSquadronCap("Mozdok", CAPZoneWest, 6000, 12000, 600, 800, 800, 1200, "BARO")
-  A2ADispatcher:SetSquadronCapInterval("Mozdok", 3, 180, 360, 1)
+  
+  -- CAP: Two groups patrolling zone CAP east.
+  A2ADispatcher:SetSquadronCap("Mozdok", zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
+  A2ADispatcher:SetSquadronCapInterval("Mozdok", 2, 180, 360, 1)
   
   -- GCI Squadron execution.
   A2ADispatcher:SetSquadronGci("Mineralnye", 900, 1200)
@@ -560,6 +635,18 @@ if A2AD then
   --A2ADispatcher:SetSquadronVisible("Mozdok")
 
 end
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Scoring
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+local scoring=SCORING:New("FPP", "FPP-Scoring.csv")
+scoring:SetMessagesDestroy(false)
+scoring:SetMessagesHit(false)
+scoring:SetMessagesZone(false)
+
+--scoring:AddZoneScore(zone.kobuletiXrange, 100)
+--scoring:AddStaticScore(ScoreStatic,Score)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Events
@@ -611,18 +698,6 @@ function eventhandler:OnEventDead(_EventData)
   end
     
 end
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- Scoring
------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-local scoring=SCORING:New("FPP", "FPP-Scoring.csv")
-scoring:SetMessagesDestroy(false)
-scoring:SetMessagesHit(false)
-scoring:SetMessagesZone(false)
-
---scoring:AddZoneScore(zone.kobuletiXrange, 100)
---scoring:AddStaticScore(ScoreStatic,Score)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
