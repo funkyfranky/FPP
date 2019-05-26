@@ -1,14 +1,16 @@
 -------------------------
 -- FPP Practice Script --
--- v0.5 by funkyfranky --
+-- v0.6 by funkyfranky --
 -------------------------
 
--- Switches if you want to include a rescue helo and/or a recovery tanker.
+-- Enable/disable modules.
 local Stennis=true
 local A2AD=true
 local Range=true
 local Warehouse=true
 local Fox=true
+local RadioComms=true
+local Scoring=false
 
 -- No MOOSE settings menu.
 _SETTINGS:SetPlayerMenuOff()
@@ -33,9 +35,9 @@ zone.CAPwest=ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West")
 zone.CAPeast=ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName("CAP Zone East")) --Core.Zone#ZONE_POLYGON
 zone.CCCPboarder=ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border")) --Core.Zone#ZONE_POLYGON
 
------------------
--- RADIO COMMS --
------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- RADIO COMMS
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Instructor radio frequency 305.00 MHz.
 local instructorfreq=305
@@ -46,48 +48,52 @@ local rangecontrolfreq=264
 -- Path in the miz where the sound files are located. Mind the "/" at the end!
 local path="Range Soundfiles/"
 
--- Instructor radio on 305 MHz (AM is the default modulation but could be set via radio.modulation.FM as second parameter).
-local InstructorRadio=RADIOQUEUE:New(instructorfreq)
-
--- Transmission are broadcasted from bombing range location.
-InstructorRadio:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
-
--- Set parameters of numbers.
-InstructorRadio:SetDigit("0", "BR-N0.ogg", 0.40, path)
-InstructorRadio:SetDigit("1", "BR-N1.ogg", 0.25, path)
-InstructorRadio:SetDigit("2", "BR-N2.ogg", 0.37, path)
-InstructorRadio:SetDigit("3", "BR-N3.ogg", 0.37, path)
-InstructorRadio:SetDigit("4", "BR-N4.ogg", 0.39, path)
-InstructorRadio:SetDigit("5", "BR-N5.ogg", 0.39, path)
-InstructorRadio:SetDigit("6", "BR-N6.ogg", 0.40, path)
-InstructorRadio:SetDigit("7", "BR-N7.ogg", 0.40, path)
-InstructorRadio:SetDigit("8", "BR-N8.ogg", 0.37, path)
-InstructorRadio:SetDigit("9", "BR-N9.ogg", 0.40, path)
-
--- Start radio queue.
-InstructorRadio:Start()
-
-
--- Range control on 264 MHz.
-local RangeControl=RADIOQUEUE:New(rangecontrolfreq)
-
--- Tranmission or broadcasted from bombing range location.
-RangeControl:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
-
--- Set parameters of numbers.
-RangeControl:SetDigit("0", "BR-N0.ogg", 0.40, path)
-RangeControl:SetDigit("1", "BR-N1.ogg", 0.25, path)
-RangeControl:SetDigit("2", "BR-N2.ogg", 0.37, path)
-RangeControl:SetDigit("3", "BR-N3.ogg", 0.37, path)
-RangeControl:SetDigit("4", "BR-N4.ogg", 0.39, path)
-RangeControl:SetDigit("5", "BR-N5.ogg", 0.39, path)
-RangeControl:SetDigit("6", "BR-N6.ogg", 0.40, path)
-RangeControl:SetDigit("7", "BR-N7.ogg", 0.40, path)
-RangeControl:SetDigit("8", "BR-N8.ogg", 0.37, path)
-RangeControl:SetDigit("9", "BR-N9.ogg", 0.40, path)
-
--- Start Radio queue.
-RangeControl:Start()
+if RadioComms then
+  
+  -- Instructor radio on 305 MHz (AM is the default modulation but could be set via radio.modulation.FM as second parameter).
+  InstructorRadio=RADIOQUEUE:New(instructorfreq)
+  
+  -- Transmission are broadcasted from bombing range location.
+  InstructorRadio:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
+  
+  -- Set parameters of numbers.
+  InstructorRadio:SetDigit("0", "BR-N0.ogg", 0.40, path)
+  InstructorRadio:SetDigit("1", "BR-N1.ogg", 0.25, path)
+  InstructorRadio:SetDigit("2", "BR-N2.ogg", 0.37, path)
+  InstructorRadio:SetDigit("3", "BR-N3.ogg", 0.37, path)
+  InstructorRadio:SetDigit("4", "BR-N4.ogg", 0.39, path)
+  InstructorRadio:SetDigit("5", "BR-N5.ogg", 0.39, path)
+  InstructorRadio:SetDigit("6", "BR-N6.ogg", 0.40, path)
+  InstructorRadio:SetDigit("7", "BR-N7.ogg", 0.40, path)
+  InstructorRadio:SetDigit("8", "BR-N8.ogg", 0.37, path)
+  InstructorRadio:SetDigit("9", "BR-N9.ogg", 0.40, path)
+  
+  -- Start radio queue.
+  InstructorRadio:Start()
+  
+  
+  -- Range control on 264 MHz.
+  RangeControl=RADIOQUEUE:New(rangecontrolfreq)
+  
+  -- Tranmission or broadcasted from bombing range location.
+  RangeControl:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
+  
+  -- Set parameters of numbers.
+  RangeControl:SetDigit("0", "BR-N0.ogg", 0.40, path)
+  RangeControl:SetDigit("1", "BR-N1.ogg", 0.25, path)
+  RangeControl:SetDigit("2", "BR-N2.ogg", 0.37, path)
+  RangeControl:SetDigit("3", "BR-N3.ogg", 0.37, path)
+  RangeControl:SetDigit("4", "BR-N4.ogg", 0.39, path)
+  RangeControl:SetDigit("5", "BR-N5.ogg", 0.39, path)
+  RangeControl:SetDigit("6", "BR-N6.ogg", 0.40, path)
+  RangeControl:SetDigit("7", "BR-N7.ogg", 0.40, path)
+  RangeControl:SetDigit("8", "BR-N8.ogg", 0.37, path)
+  RangeControl:SetDigit("9", "BR-N9.ogg", 0.40, path)
+  
+  -- Start Radio queue.
+  RangeControl:Start()
+  
+end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Practice Ranges
@@ -128,12 +134,14 @@ if Range then
       MESSAGE:New(text, 10):ToClient(player.client)
       
       -- Radio message.
-      RangeControl:NewTransmission("BR-Impact.ogg", 0.60, path)                  -- Duration of voice over is 0.60 sec.
-      RangeControl:Number2Transmission(string.format("%03d", radial), nil, 0.2)  -- 0.2 sec interval to prev transmission.
-      RangeControl:NewTransmission("BR-Degrees.ogg", 0.60, path)
-      RangeControl:NewTransmission("BR-For.ogg", 0.75, path)
-      RangeControl:Number2Transmission(string.format("%d", distance), nil, 0.2)  -- 0.2 sec interval to prev transmission.
-      RangeControl:NewTransmission("BR-Feet.ogg", 0.35, path)
+      if RadioComms then
+        RangeControl:NewTransmission("BR-Impact.ogg", 0.60, path)                  -- Duration of voice over is 0.60 sec.
+        RangeControl:Number2Transmission(string.format("%03d", radial), nil, 0.2)  -- 0.2 sec interval to prev transmission.
+        RangeControl:NewTransmission("BR-Degrees.ogg", 0.60, path)
+        RangeControl:NewTransmission("BR-For.ogg", 0.75, path)
+        RangeControl:Number2Transmission(string.format("%d", distance), nil, 0.2)  -- 0.2 sec interval to prev transmission.
+        RangeControl:NewTransmission("BR-Feet.ogg", 0.35, path)
+      end
       
     end
     
@@ -149,10 +157,12 @@ if Range then
       local RF=UTILS.Split(string.format("%.2f", rangecontrolfreq), ".")
       
       -- Radio message that player entered the range
-      InstructorRadio:NewTransmission("BR-Enter.ogg", 4.60, path)
-      InstructorRadio:Number2Transmission(RF[1])
-      InstructorRadio:NewTransmission("BR-Point.ogg", 0.33, path)
-      InstructorRadio:Number2Transmission(RF[2])
+      if RadioComms then
+        InstructorRadio:NewTransmission("BR-Enter.ogg", 4.60, path)
+        InstructorRadio:Number2Transmission(RF[1])
+        InstructorRadio:NewTransmission("BR-Point.ogg", 0.33, path)
+        InstructorRadio:Number2Transmission(RF[2])
+      end
       
     end
     
@@ -165,7 +175,9 @@ if Range then
       MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
       
       -- Radio message player left.
-      RangeControl:NewTransmission("BR-Exit.ogg", 2.80, path)
+      if RadioComms then
+        RangeControl:NewTransmission("BR-Exit.ogg", 2.80, path)
+      end
     
     end  
   
@@ -205,26 +217,59 @@ if Warehouse then
   warehouse.tbilisi:AddRequest(warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "C-130", 1, nil, nil, nil, "Transport")
   
   function warehouse.tbilisi:OnAfterAssetSpawned(From,Event,To,group,asset)
-    self:__AddRequest(10*60,warehouse.kobuleti,WAREHOUSE.Descriptor.GROUPNAME, "C-130", 1, nil, nil, nil, "Transport")
+    self:__AddRequest(30*60,warehouse.kobuleti,WAREHOUSE.Descriptor.GROUPNAME, "C-130", 1, nil, nil, nil, "Transport")
   end
 
   --------------
   -- Kobuleti --
   --------------
 
-  local function StartTanker(group)    
-    local speed=UTILS.KnotsToMps(300)
+  -- Is it Arco's turn? If not, we use Shell.
+  local arco=true
+  
+  local ArcoRTB=USERFLAG:New("Arco RTB")
+  local ShellRTB=USERFLAG:New("Shell RTB")
+  ArcoRTB:Set(1)
+  ShellRTB:Set(1)
+
+  --- Tanker setup.
+  local function StartTanker(_group)
+    local group=_group --Wrapper.Group#GROUP
+    local speed=UTILS.KnotsToMps(350)
     local altitude=UTILS.FeetToMeters(25000)
     
     local c1=zone.tanker:GetCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
     local c2=c1:Translate(UTILS.NMToMeters(50), 270):SetAltitude(altitude)
     
+    -- 
+    local tacanch=3
+    local tacanmorse="SHL"
+    local callsign=CALLSIGN.Tanker.Shell
+    local tankerRTB="Shell RTB"
+    if arco then
+      tacanch=4
+      tacanmorse="ACO"
+      callsign=CALLSIGN.Tanker.Arco
+      tankerRTB="Arco RTB"
+      ArcoRTB:Set(1)
+    else
+      ShellRTB:Set(1)
+    end
+    
     -- Orbit in race track pattern.
     local TaskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
     
+    -- Orbit until flag=2
+    local TaskCondition=group:TaskCondition(nil, tankerRTB, 2, nil, nil, nil)
+    
+    -- Controlled Task.
+    local TaskControlled=group:TaskControlled(TaskOrbit, TaskCondition)
+    
+    -- Define waypoints.
     local wp={}
     wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{TaskOrbit}, "Tanker")
+    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {TaskControlled}, "Tanker")
+    wp[3]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirLanding(UTILS.MpsToKmph(speed), warehouse.kobuleti:GetAirbase(),{}, "Landing Kobuleti")
     
     group:StartUncontrolled()
             
@@ -232,12 +277,26 @@ if Warehouse then
     local TaskTanker=group:EnRouteTaskTanker()
     local TaskCombo=group:TaskCombo({TaskTanker, TaskRoute})
     
+    -- Create a new beacon and activate TACAN.
+    local unit=group:GetUnit(1)
+        
+    -- Activate TACAN.
+    local beacon=BEACON:New(unit)
+    beacon:ActivateTACAN(tacanch, "Y", tacanmorse, true)
+    group:CommandSetCallsign(callsign, 1, 1)
+    
+    -- Invert switch.
+    arco=not arco
+    
     group:OptionROTNoReaction()
     
     group:SetTask(TaskCombo, 1)
   end
 
-  local function StartAWACS(group)
+  --- AWACS setup.
+  local function StartAWACS(_group)
+    local group=_group --Wrapper.Group#GROUP
+    
     local speed=UTILS.KnotsToMps(300)
     local altitude=UTILS.FeetToMeters(20000)
     
@@ -257,6 +316,7 @@ if Warehouse then
     local TaskAWACS=group:EnRouteTaskAWACS()
     local TaskCombo=group:TaskCombo({TaskAWACS, TaskRoute})
     
+    group:CommandSetCallsign(CALLSIGN.AWACS.Magic, 1, 1)
     group:OptionROTNoReaction()
     group:CommandEPLRS(true, 1)
     
@@ -267,7 +327,9 @@ if Warehouse then
   warehouse.kobuleti:AddAsset("E-3A Group", 2)
   warehouse.kobuleti:AddAsset("KC-135 Group", 2)
   
-  warehouse.kobuleti:SetLowFuelThreshold(0.95)
+  -- Debug testing.
+  --warehouse.kobuleti:SetLowFuelThreshold(0.95)
+
   
   -- Self request AWACS.
   warehouse.kobuleti:__AddRequest(10, warehouse.kobuleti, WAREHOUSE.Descriptor.GROUPNAME, "E-3A Group", 1, nil, nil, nil, "AWACS")
@@ -305,6 +367,20 @@ if Warehouse then
     
     -- Send a new tanker or AWACS once the other runs out of fuel.
     if assignment=="AWACS" or assignment=="Tanker" then
+    
+      if assignment=="AWACS" then
+      
+      elseif assignment=="Tanker" then
+        if arco then
+          -- Send Arco home.
+          ArcoRTB:Set(2)
+        else
+          -- Send Shell home.
+          ShellRTB:Set(2)
+        end
+      end
+    
+      -- Send new tanker.
       warehouse.kobuleti:AddRequest(warehouse.kobuleti, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
     end
     
@@ -385,7 +461,7 @@ if Warehouse then
         
         local wp={}
         wp[1]=warehouse.maykop:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{taskOrbit}, "Orbit")
+        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {taskOrbit}, "Orbit")
         
         group:StartUncontrolled()
         
@@ -400,12 +476,13 @@ if Warehouse then
   
   
   --- Function called when all assets of a request were delivered.
-  function warehouse.maykop:OnAfterDelivered(From,Event,To,request)
+  function warehouse.maykop:OnAfterDelivered(From,Event,To,_request)
+    local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem
     local assignment=self:GetAssignment(request)
     
     -- Spawn new drone if one returned, e.g. because out of fuel.
     if assignment=="Drone" then
-      warehouse.maykop:AddRequest(warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, asset.templatename, 1, nil, nil, nil, "Drone")
+      warehouse.maykop:AddRequest(warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
     end
   
   end
@@ -417,7 +494,7 @@ if Warehouse then
     
     -- Spawn new drone if one was shot down.
     if request.assignment=="Drone" then
-      warehouse.maykop:AddRequest(warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, asset.templatename, 1, nil, nil, nil, "Drone")
+      warehouse.maykop:AddRequest(warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, request.assignment)
     end
   end
   
@@ -504,7 +581,8 @@ if Stennis then
   tanker:SetTakeoffAir()
   tanker:SetRadio(250)
   tanker:SetModex(501)
-  tanker:SetTACAN(1, "TKR")
+  tanker:SetCallsign(CALLSIGN.Tanker.Texaco, 1)
+  tanker:SetTACAN(1, "TEX")
   tanker:Start()
   
   -- E-2D AWACS spawning in air
@@ -530,12 +608,15 @@ if Stennis then
   local AirbossStennis=AIRBOSS:New("USS Stennis")
   
   -- Add recovery windows:
-  -- Case I from 9 to 10 am.
-  local window1=AirbossStennis:AddRecoveryWindow( "6:35", "10:00", 1, nil, true, 25)
-  -- Case II with +15 degrees holding offset from 15:00 for 60 min.
-  local window2=AirbossStennis:AddRecoveryWindow("15:00", "16:00", 2,  15, true, 23)
-  -- Case III with +30 degrees holding offset from 2100 to 2200.
-  local window3=AirbossStennis:AddRecoveryWindow("21:00", "22:00", 3,  30, true, 21)
+  local window1=AirbossStennis:AddRecoveryWindow(  "7:30",  "8:30", 1, nil, true, 25)
+  local window2=AirbossStennis:AddRecoveryWindow(  "9:30", "10:30", 1, nil, true, 25)
+  local window3=AirbossStennis:AddRecoveryWindow( "11:30", "12:30", 1, nil, true, 25)
+  local window3=AirbossStennis:AddRecoveryWindow( "13:30", "14:30", 1, nil, true, 25)
+  local window3=AirbossStennis:AddRecoveryWindow( "15:30", "16:30", 1, nil, true, 25)
+  local window3=AirbossStennis:AddRecoveryWindow( "17:30", "18:30", 1, nil, true, 25)
+  local window3=AirbossStennis:AddRecoveryWindow( "19:30", "20:30", 1, nil, true, 25)
+  -- Case III with +30 degrees holding offset from 21:30 to 7:30 next day.
+  local window3=AirbossStennis:AddRecoveryWindow("21:30", "7:30:00+1", 3, 30, true, 25)
   
   -- Load all saved player grades from your "Saved Games\DCS" folder (if lfs was desanitized).
   AirbossStennis:Load(nil, "FPP-Greenieboard.csv")
@@ -640,13 +721,17 @@ end
 -- Scoring
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-local scoring=SCORING:New("FPP", "FPP-Scoring.csv")
-scoring:SetMessagesDestroy(false)
-scoring:SetMessagesHit(false)
-scoring:SetMessagesZone(false)
+if Scoring then
 
---scoring:AddZoneScore(zone.kobuletiXrange, 100)
---scoring:AddStaticScore(ScoreStatic,Score)
+  local scoring=SCORING:New("FPP", "FPP-Scoring.csv")
+  scoring:SetMessagesDestroy(false)
+  scoring:SetMessagesHit(false)
+  scoring:SetMessagesZone(false)
+  
+  --scoring:AddZoneScore(zone.kobuletiXrange, 100)
+  --scoring:AddStaticScore(ScoreStatic,Score)
+
+end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Events
