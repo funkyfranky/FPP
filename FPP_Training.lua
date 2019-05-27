@@ -1,6 +1,6 @@
 -------------------------
 -- FPP Practice Script --
--- v0.6 by funkyfranky --
+-- v0.7 by funkyfranky --
 -------------------------
 
 -- Enable/disable modules.
@@ -108,12 +108,23 @@ if Range then
   range.Kutaisi:SetRangeZone(zone.kutaisirange)
   range.Kutaisi:AddBombingTargetGroup(GROUP:FindByName("Kutaisi Unarmed Targets"), 50, true)
   range.Kutaisi:AddBombingTargetCoordinate(zone.kutaisiTechCombine:GetCoordinate(), "Kutaisi Tech Combine", 50)
-  range.Kutaisi:Start()
   
   range.KobuletiX=RANGE:New("Kobuleti X")  --Functional.Range#RANGE
   range.KobuletiX:SetRangeZone(zone.kobuletiXrange)
   range.KobuletiX:AddBombingTargetCoordinate(zone.kobuletiXbombtarget:GetCoordinate(), "Kobuleti X Bombing Target", 50)
-  range.KobuletiX:Start()
+  
+  -- Start ranges.
+  for _,_myrange in pairs(range) do
+    local myrange=_myrange --Functional.Range#RANGE
+    myrange:SetDefaultPlayerSmokeBomb(false)
+    myrange:SetAutosaveOn()
+    myrange:Start()    
+  end
+  
+  -- Big fire
+  zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.1)
+  zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.2)
+  zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.3)
   
   for _,_myrange in pairs(range) do
     local myrange=_myrange
@@ -131,7 +142,7 @@ if Range then
       
       -- Text message to player only.
       local text=string.format("Impact %03d° for %d ft.", radial, distance)
-      MESSAGE:New(text, 10):ToClient(player.client)
+      --MESSAGE:New(text, 10):ToClient(player.client)
       
       -- Radio message.
       if RadioComms then
@@ -437,7 +448,7 @@ if Warehouse then
   end
   
   
-  for i=1,10 do
+  for i=1,8 do
     local r=math.random(2)
     local drone=drones[r]
     warehouse.maykop:__AddRequest((i-1)*30, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
@@ -515,7 +526,9 @@ if Warehouse then
   warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "Infantry Rus Group 5", 3, nil, nil, nil, "Patrol")
   warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "SA-18 Manpad Group", 3, nil, nil, nil, "Patrol")
   
-  
+  -- Big smoke.
+  zone.Skala:GetRandomCoordinate():BigSmokeLarge(0.1)
+    
   function warehouse.skala:OnAfterSelfRequest(From,Event,To,groupset,request)
     
     local assignment=self:GetAssignment(request)
@@ -549,9 +562,7 @@ if Fox then
   -- Add launch zones.
   fox:AddLaunchZone(zone.SAMKrim)
   fox:AddLaunchZone(zone.SAMKrymsk)
-  
-  fox:AddProtectedGroup(GROUP:FindByName("A-10 Target"))
-  
+
   -- Start trainer.
   fox:Start()
   
@@ -575,6 +586,12 @@ if Stennis then
 
   -- Set mission menu.
   AIRBOSS.MenuF10Root=MENU_MISSION:New("Airboss").MenuPath
+  
+  -- Path is in DCS log directory.
+  local savepath=nil 
+  if lfs then
+    savepath=lfs.writedir()..[[Logs]]
+  end
   
   -- S-3B Recovery Tanker spawning in air.
   local tanker=RECOVERYTANKER:New("USS Stennis", "S-3B Tanker Group")
@@ -619,10 +636,10 @@ if Stennis then
   local window3=AirbossStennis:AddRecoveryWindow("21:30", "7:30:00+1", 3, 30, true, 25)
   
   -- Load all saved player grades from your "Saved Games\DCS" folder (if lfs was desanitized).
-  AirbossStennis:Load(nil, "FPP-Greenieboard.csv")
+  AirbossStennis:Load(savepath, "FPP-Greenieboard.csv")
   
   -- Automatically save player results to your "Saved Games\DCS" folder each time a player get a final grade from the LSO.
-  AirbossStennis:SetAutoSave(nil, "FPP-Greenieboard.csv")
+  AirbossStennis:SetAutoSave(savepath, "FPP-Greenieboard.csv")
   
   AirbossStennis:SetRadioRelayLSO(rescuehelo:GetUnitName())
   AirbossStennis:SetRadioRelayMarshal("Huey Radio Relay")
@@ -635,7 +652,7 @@ if Stennis then
   AirbossStennis:SetExcludeAI(CarrierExcludeSet)
   
   -- Enable trap sheet.
-  AirbossStennis:SetTrapSheet(nil, "FPP-Trapsheet")
+  AirbossStennis:SetTrapSheet(savepath, "FPP-Trapsheet")
    
   -- Single carrier menu optimization.
   AirbossStennis:SetMenuSingleCarrier()
@@ -723,13 +740,17 @@ end
 
 if Scoring then
 
+  -- Scoring object.
   local scoring=SCORING:New("FPP", "FPP-Scoring.csv")
+  
+  -- Stay silent!
   scoring:SetMessagesDestroy(false)
   scoring:SetMessagesHit(false)
   scoring:SetMessagesZone(false)
   
-  --scoring:AddZoneScore(zone.kobuletiXrange, 100)
-  --scoring:AddStaticScore(ScoreStatic,Score)
+  
+  scoring:AddZoneScore(zone.Skala, 10)
+  scoring:AddStaticScore(ScoreStatic,Score)
 
 end
 
@@ -748,6 +769,9 @@ function eventhandler:OnEventDead(_EventData)
   
   -- Name of the dead unit.
   local unitname=EventData.IniUnitName
+  
+  -- Name of the group.
+  local groupname=EventData.IniGroupName
   
   
   -- Debug
@@ -775,8 +799,8 @@ function eventhandler:OnEventDead(_EventData)
       BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
     end
     
-    -- Respawn SA-10 site after 10 min if one unit is dead.
-    if EventData.IniGroupName=="SA-10" then
+    -- Respawn SAM sites after 10 min if one unit is dead.
+    if groupname=="SA-10" or groupname=="SA-15 Krymsk" or groupname=="SA-8 Krymsk" then
       BASE:ScheduleOnce(10*60, GROUP.Respawn, EventData.IniGroup)
     end
   
