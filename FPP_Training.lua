@@ -253,12 +253,12 @@ if Warehouse then
     local c2=c1:Translate(UTILS.NMToMeters(50), 270):SetAltitude(altitude)
     
     -- 
-    local tacanch=3
+    local tacanch=4
     local tacanmorse="SHL"
     local callsign=CALLSIGN.Tanker.Shell
     local tankerRTB="Shell RTB"
     if arco then
-      tacanch=4
+      tacanch=3
       tacanmorse="ACO"
       callsign=CALLSIGN.Tanker.Arco
       tankerRTB="Arco RTB"
@@ -280,7 +280,7 @@ if Warehouse then
     local wp={}
     wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
     wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {TaskControlled}, "Tanker")
-    wp[3]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirLanding(UTILS.MpsToKmph(speed), warehouse.kobuleti:GetAirbase(),{}, "Landing Kobuleti")
+    wp[3]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirLanding(UTILS.MpsToKmph(speed), warehouse.kobuleti:GetAirbase(), {}, "Landing Kobuleti")
     
     group:StartUncontrolled()
             
@@ -329,9 +329,9 @@ if Warehouse then
     
     group:CommandSetCallsign(CALLSIGN.AWACS.Magic, 1, 1)
     group:OptionROTNoReaction()
-    group:CommandEPLRS(true, 1)
+    group:CommandEPLRS(true, 2)
     
-    group:SetTask(TaskCombo, 1)  
+    group:SetTask(TaskCombo, 1)
   end
   
   -- Add assets.
