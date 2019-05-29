@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/TeX Live for SUSE Linux) (preloaded format=pdflatex 2018.6.12)  29 MAY 2019 13:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/TeX Live for SUSE Linux) (preloaded format=pdflatex 2018.6.12)  29 MAY 2019 16:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1104,61 +1104,61 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 ABD: EveryShipout initializing macros
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 252.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 256.
 
 (/usr/share/texmf/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 LaTeX Font Info:    Font shape `T1/pcr/bx/sc' in size <20.74> not available
-(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 252.
+(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 256.
 LaTeX Font Info:    Font shape `T1/pcr/bx/sc' in size <14.4> not available
-(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 252.
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 252.
+(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 256.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 256.
 
 
 (/usr/share/texmf/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 252.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 256.
 
 
 (/usr/share/texmf/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 252
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 256
 .
 
 (/usr/share/texmf/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 252
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 256
 .
 
 (/usr/share/texmf/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 252.
+(Font)              <12> on input line 256.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 252.
+(Font)              <8> on input line 256.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 252.
-LaTeX Font Info:    Try loading font information for U+msa on input line 252.
+(Font)              <6> on input line 256.
+LaTeX Font Info:    Try loading font information for U+msa on input line 256.
 
 (/usr/share/texmf/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 252.
+LaTeX Font Info:    Try loading font information for U+msb on input line 256.
 
 (/usr/share/texmf/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for U+wasy on input line 252.
+LaTeX Font Info:    Try loading font information for U+wasy on input line 256.
 
 (/usr/share/texmf/tex/latex/wasysym/uwasy.fd
 File: uwasy.fd 2003/10/30 v2.0 Wasy-2 symbol font definitions
 )
-LaTeX Font Info:    Try loading font information for U+stmry on input line 252.
+LaTeX Font Info:    Try loading font information for U+stmry on input line 256.
 
 
 (/usr/share/texmf/tex/latex/stmaryrd/Ustmry.fd) [1
@@ -1168,7 +1168,7 @@ LaTeX Font Info:    Try loading font information for U+stmry on input line 252.
 File: ../gimp/Range_Kobuleti_Sat.png Graphic file (type png)
 
 <use ../gimp/Range_Kobuleti_Sat.png>
-Package pdftex.def Info: ../gimp/Range_Kobuleti_Sat.png used on input line 252.
+Package pdftex.def Info: ../gimp/Range_Kobuleti_Sat.png used on input line 256.
 
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
  [2 <../gimp/Range_Kobuleti_Sat.png>]
@@ -1176,48 +1176,55 @@ Package pdftex.def Info: ../gimp/Range_Kobuleti_Sat.png used on input line 252.
 File: ../gimp/Range_Kutaisi_Pic1.png Graphic file (type png)
 
 <use ../gimp/Range_Kutaisi_Pic1.png>
-Package pdftex.def Info: ../gimp/Range_Kutaisi_Pic1.png used on input line 252.
+Package pdftex.def Info: ../gimp/Range_Kutaisi_Pic1.png used on input line 256.
 
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
- [3 <../gimp/Range_Kutaisi_Pic1.png (PNG copy)>] [4] [5] <../gimp/FARP_Skala_Sa
-t.png, id=28, 2569.6pt x 1445.4pt>
+ [3 <../gimp/Range_Kutaisi_Pic1.png>]
+[4] [5] <../gimp/FARP_Skala_Sat.png, id=29, 2569.6pt x 1445.4pt>
 File: ../gimp/FARP_Skala_Sat.png Graphic file (type png)
 
 <use ../gimp/FARP_Skala_Sat.png>
-Package pdftex.def Info: ../gimp/FARP_Skala_Sat.png used on input line 252.
+Package pdftex.def Info: ../gimp/FARP_Skala_Sat.png used on input line 256.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
- [6 <../gimp/FARP_Skala_Sat.png>]
-<../gimp/SA10_01.png, id=33, 1599.9775pt x 1441.385pt>
+
+<../gimp/FARP_Skala_Pic.png, id=30, 2567.5925pt x 1029.8475pt>
+File: ../gimp/FARP_Skala_Pic.png Graphic file (type png)
+
+<use ../gimp/FARP_Skala_Pic.png>
+Package pdftex.def Info: ../gimp/FARP_Skala_Pic.png used on input line 256.
+(pdftex.def)             Requested size: 318.66948pt x 127.80348pt.
+ [6 <../gimp/FARP_Skala_Sat.png> <../gimp/FARP_Skala_Pic.png>] <../gimp/SA10_01
+.png, id=36, 1599.9775pt x 1441.385pt>
 File: ../gimp/SA10_01.png Graphic file (type png)
 
 <use ../gimp/SA10_01.png>
-Package pdftex.def Info: ../gimp/SA10_01.png used on input line 252.
+Package pdftex.def Info: ../gimp/SA10_01.png used on input line 256.
 (pdftex.def)             Requested size: 318.66948pt x 287.06224pt.
- <../gimp/SA10_02.png, id=34, 2320.67pt x 1063.975pt>
+ <../gimp/SA10_02.png, id=37, 2320.67pt x 1063.975pt>
 File: ../gimp/SA10_02.png Graphic file (type png)
 
 <use ../gimp/SA10_02.png>
-Package pdftex.def Info: ../gimp/SA10_02.png used on input line 252.
+Package pdftex.def Info: ../gimp/SA10_02.png used on input line 256.
 (pdftex.def)             Requested size: 318.66948pt x 146.09813pt.
  [7 <../gimp/SA10_01.png> <../gimp/SA10_02.png>]
-<../gimp/SA15_Sat.png, id=41, 2569.6pt x 1445.4pt>
+<../gimp/SA15_Sat.png, id=44, 2569.6pt x 1445.4pt>
 File: ../gimp/SA15_Sat.png Graphic file (type png)
  <use ../gimp/SA15_Sat.png>
-Package pdftex.def Info: ../gimp/SA15_Sat.png used on input line 252.
+Package pdftex.def Info: ../gimp/SA15_Sat.png used on input line 256.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
 
-<../gimp/SA8_Sat.png, id=42, 2569.6pt x 1445.4pt>
+<../gimp/SA8_Sat.png, id=45, 2569.6pt x 1445.4pt>
 File: ../gimp/SA8_Sat.png Graphic file (type png)
  <use ../gimp/SA8_Sat.png>
-Package pdftex.def Info: ../gimp/SA8_Sat.png used on input line 252.
+Package pdftex.def Info: ../gimp/SA8_Sat.png used on input line 256.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
 
 [8 <../gimp/SA15_Sat.png> <../gimp/SA8_Sat.png>] (./FPP_Training.aux) ) 
 Here is how much of TeX's memory you used:
- 15050 strings out of 494035
- 274622 string characters out of 6158521
+ 15055 strings out of 494035
+ 274763 string characters out of 6158521
  311845 words of memory out of 5000000
- 18072 multiletter control sequences out of 15000+600000
+ 18076 multiletter control sequences out of 15000+600000
  24979 words of font info for 51 fonts, out of 8000000 for 9000
  475 hyphenation exceptions out of 8191
  55i,5n,54p,414b,239s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1226,10 +1233,10 @@ are/texmf/fonts/enc/dvips/base/8r.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-m
 athsy.enc}</usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/
 fonts/type1/urw/courier/ucrb8a.pfb></usr/share/texmf/fonts/type1/urw/courier/uc
 rr8a.pfb>
-Output written on FPP_Training.pdf (8 pages, 14483370 bytes).
+Output written on FPP_Training.pdf (8 pages, 15940691 bytes).
 PDF statistics:
- 62 PDF objects out of 1000 (max. 8388607)
+ 65 PDF objects out of 1000 (max. 8388607)
  35 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 48 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 53 words of extra memory for PDF output out of 10000 (max. 10000000)
 
