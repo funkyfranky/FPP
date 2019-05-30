@@ -42,8 +42,10 @@ zone.CCCPboarder=ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border")
 -- Instructor radio frequency 305.00 MHz.
 local instructorfreq=305
 
--- Range control radio frequency 264.00 MHz.
-local rangecontrolfreq=264
+-- Kobuleti range control radio frequency 264.00 MHz.
+local rangecontrolfreq={}
+rangecontrolfreq.KobuletiX=254
+rangecontrolfreq.Kutaisi=256
 
 -- Path in the miz where the sound files are located. Mind the "/" at the end!
 local path="Range Soundfiles/"
@@ -71,28 +73,34 @@ if RadioComms then
   -- Start radio queue.
   InstructorRadio:Start()
   
+  -- Range control.
+  RangeControl={}
   
-  -- Range control on 264 MHz.
-  RangeControl=RADIOQUEUE:New(rangecontrolfreq)
+  -- Set frequency
+  RangeControl.KobuletiX = RADIOQUEUE:New(rangecontrolfreq.KobuletiX) --Core.Beacon#RADIOQUEUE
+  RangeControl.Kutaisi   = RADIOQUEUE:New(rangecontrolfreq.Kutaisi)   --Core.Beacon#RADIOQUEUE
   
   -- Tranmission or broadcasted from bombing range location.
-  RangeControl:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
+  RangeControl.KobuletiX:SetSenderCoordinate(zone.kobuletiXrange:GetCoordinate())
+  RangeControl.Kutaisi:SetSenderCoordinate(zone.kutaisirange:GetCoordinate())
   
   -- Set parameters of numbers.
-  RangeControl:SetDigit("0", "BR-N0.ogg", 0.40, path)
-  RangeControl:SetDigit("1", "BR-N1.ogg", 0.25, path)
-  RangeControl:SetDigit("2", "BR-N2.ogg", 0.37, path)
-  RangeControl:SetDigit("3", "BR-N3.ogg", 0.37, path)
-  RangeControl:SetDigit("4", "BR-N4.ogg", 0.39, path)
-  RangeControl:SetDigit("5", "BR-N5.ogg", 0.39, path)
-  RangeControl:SetDigit("6", "BR-N6.ogg", 0.40, path)
-  RangeControl:SetDigit("7", "BR-N7.ogg", 0.40, path)
-  RangeControl:SetDigit("8", "BR-N8.ogg", 0.37, path)
-  RangeControl:SetDigit("9", "BR-N9.ogg", 0.40, path)
-  
-  -- Start Radio queue.
-  RangeControl:Start()
-  
+  for _,_rangecontrol in pairs(RangeControl) do
+    local rangecontrol=_rangecontrol --Core.Beacon#RADIOQUEUE
+    rangecontrol:SetDigit("0", "BR-N0.ogg", 0.40, path)
+    rangecontrol:SetDigit("1", "BR-N1.ogg", 0.25, path)
+    rangecontrol:SetDigit("2", "BR-N2.ogg", 0.37, path)
+    rangecontrol:SetDigit("3", "BR-N3.ogg", 0.37, path)
+    rangecontrol:SetDigit("4", "BR-N4.ogg", 0.39, path)
+    rangecontrol:SetDigit("5", "BR-N5.ogg", 0.39, path)
+    rangecontrol:SetDigit("6", "BR-N6.ogg", 0.40, path)
+    rangecontrol:SetDigit("7", "BR-N7.ogg", 0.40, path)
+    rangecontrol:SetDigit("8", "BR-N8.ogg", 0.37, path)
+    rangecontrol:SetDigit("9", "BR-N9.ogg", 0.40, path)
+    
+    -- Start Radio queue.
+    rangecontrol:Start()
+  end  
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,8 +134,8 @@ if Range then
   zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.2)
   zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.3)
   
-  for _,_myrange in pairs(range) do
-    local myrange=_myrange
+  for rangename,_myrange in pairs(range) do
+    local myrange=_myrange  --Functional.Range#RANGE
 
     --- Function called on each bomb impact.
     function myrange:OnAfterImpact(From,Event,To,_result,_player)
@@ -146,12 +154,12 @@ if Range then
       
       -- Radio message.
       if RadioComms then
-        RangeControl:NewTransmission("BR-Impact.ogg", 0.60, path)                  -- Duration of voice over is 0.60 sec.
-        RangeControl:Number2Transmission(string.format("%03d", radial), nil, 0.2)  -- 0.2 sec interval to prev transmission.
-        RangeControl:NewTransmission("BR-Degrees.ogg", 0.60, path)
-        RangeControl:NewTransmission("BR-For.ogg", 0.75, path)
-        RangeControl:Number2Transmission(string.format("%d", distance), nil, 0.2)  -- 0.2 sec interval to prev transmission.
-        RangeControl:NewTransmission("BR-Feet.ogg", 0.35, path)
+        RangeControl[rangename]:NewTransmission("BR-Impact.ogg", 0.60, path)                  -- Duration of voice over is 0.60 sec.
+        RangeControl[rangename]:Number2Transmission(string.format("%03d", radial), nil, 0.2)  -- 0.2 sec interval to prev transmission.
+        RangeControl[rangename]:NewTransmission("BR-Degrees.ogg", 0.60, path)
+        RangeControl[rangename]:NewTransmission("BR-For.ogg", 0.75, path)
+        RangeControl[rangename]:Number2Transmission(string.format("%d", distance), nil, 0.2)  -- 0.2 sec interval to prev transmission.
+        RangeControl[rangename]:NewTransmission("BR-Feet.ogg", 0.35, path)
       end
       
     end
@@ -161,11 +169,11 @@ if Range then
       local player=_player --Functional.Range#RANGE.PlayerData
     
       -- Debug text message.
-      local text=string.format("You should now hear a radio message on %.2f MHz that you entered the bombing range and switch to %.2f MHz.", instructorfreq, rangecontrolfreq)
+      local text=string.format("You should now hear a radio message on %.2f MHz that you entered the bombing range and switch to %.2f MHz.", rangecontrolfreq[rangename], rangecontrolfreq[rangename])
       MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
         
       -- Range control radio frequency split.
-      local RF=UTILS.Split(string.format("%.2f", rangecontrolfreq), ".")
+      local RF=UTILS.Split(string.format("%.2f", rangecontrolfreq[rangename]), ".")
       
       -- Radio message that player entered the range
       if RadioComms then
@@ -182,7 +190,7 @@ if Range then
       local player=_player --Functional.Range#RANGE.PlayerData
     
       -- Debug text message.
-      local text=string.format("You should now hear a radio message on %.2f MHz that you left the bombing range.", rangecontrolfreq)
+      local text=string.format("You should now hear a radio message on %.2f MHz that you left the bombing range.", rangecontrolfreq[rangename])
       MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
       
       -- Radio message player left.
@@ -208,9 +216,9 @@ if Warehouse then
   warehouse.kobuleti = WAREHOUSE:New(STATIC:FindByName("Warehouse Kobuleti")) --Functional.Warehouse#WAREHOUSE
   warehouse.tbilisi  = WAREHOUSE:New(STATIC:FindByName("Warehouse Tbilisi"))  --Functional.Warehouse#WAREHOUSE
   warehouse.maykop   = WAREHOUSE:New(STATIC:FindByName("Warehouse Maykop"))   --Functional.Warehouse#WAREHOUSE
-  warehouse.skala    = WAREHOUSE:New(STATIC:FindByName("Skala Command Post")) --Functional.Warehouse#WAREHOUSE
   warehouse.beslan   = WAREHOUSE:New(STATIC:FindByName("Warehouse Beslan"))   --Functional.Warehouse#WAREHOUSE
   warehouse.nalchik  = WAREHOUSE:New(STATIC:FindByName("Warehouse Nalchik"))  --Functional.Warehouse#WAREHOUSE
+  warehouse.skala    = WAREHOUSE:New(STATIC:FindByName("Skala Command Post")) --Functional.Warehouse#WAREHOUSE
   
   -- Start warehouses.
   for _,_warehouse in pairs(warehouse) do
@@ -610,7 +618,7 @@ if Stennis then
   awacs:SetCallsign(CALLSIGN.AWACS.Wizard)
   awacs:SetRacetrackDistances(30, 15)
   awacs:SetModex(601)
-  awacs:SetTACAN(2, "WIZ")
+  awacs:SetTACANoff()
   awacs:__Start(1)
   
   -- Rescue Helo spawned in air with home base USS Perry.
@@ -750,7 +758,7 @@ if Scoring then
   
   
   scoring:AddZoneScore(zone.Skala, 10)
-  scoring:AddStaticScore(ScoreStatic,Score)
+  --scoring:AddStaticScore(ScoreStatic,Score)
 
 end
 
