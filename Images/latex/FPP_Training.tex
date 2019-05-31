@@ -1,0 +1,277 @@
+\documentclass[a4paper,12pt,dvipsnames]{letter}
+%
+\usepackage[a4paper]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{courier}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{amsmath} 
+\usepackage{amsfonts} 
+\usepackage{amssymb}
+\usepackage{wasysym}
+\usepackage{marvosym}
+\usepackage{stmaryrd}
+\usepackage{tikz}
+\usepackage{textcomp}
+\usepackage{enumitem}
+\usepackage{graphicx}
+%
+% set page geometry
+\geometry{top=0.5cm,left=1cm,right=4cm,bottom=1cm}
+\pagestyle{empty}
+%
+% special columns
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%
+% increase row height
+\renewcommand{\arraystretch}{1.0}
+%
+\makeatletter
+\newcommand{\thickhline}{\noalign {\ifnum 0=`}\fi \hrule height 2pt \futurelet \reserved@a \@xhline}
+\newcommand{\medhline}{\noalign {\ifnum 0=`}\fi \hrule height 1pt \futurelet \reserved@a \@xhline}
+\newcolumntype{"}{@{\hskip\tabcolsep\vrule width 1pt\hskip\tabcolsep}}
+\makeatother
+%
+\newlength{\Oldarrayrulewidth}
+\newcommand{\Cline}[2]{\noalign{\global\setlength{\Oldarrayrulewidth}{\arrayrulewidth}}\noalign{\global\setlength{\arrayrulewidth}{#1}}\cline{#2}\noalign{\global\setlength{\arrayrulewidth}{\Oldarrayrulewidth}}}
+%
+% my commands
+\newcommand{\rot}[1]{\textcolor{red}{#1}}
+\newcommand{\blau}[1]{\textcolor{blue}{#1}}
+\newcommand{\grun}[1]{\textcolor{Green}{#1}}
+\newcommand{\gelb}[1]{\textcolor{Yellow}{#1}}
+\newcommand{\rotb}[1]{\textcolor{red}  {\textbf{#1}}}
+\newcommand{\grnb}[1]{\textcolor{Green}{\textbf{#1}}}
+\newcommand{\blub}[1]{\textcolor{blue} {\textbf{#1}}}
+\newcommand{\oranb}[1]{\textcolor{BurntOrange} {\textbf{#1}}}
+\newcommand{\gelbb}[1]{\textcolor{Yellow} {\textbf{#1}}}
+\newcommand{\radio}[1]{\textcolor{blue}{#1}}
+\newcommand{\call}[1]{\textcolor{blue}{{#1}}}
+\newcommand{\button}[1]{\textbf{#1}}
+\newcommand{\degC}{\textdegree{}C}
+\newcommand{\Deg}{\textdegree{}}
+\newcommand{\DMS}[3]{#1\Deg#2'#3''}
+\newcommand{\ok}[1]{\textcolor{Green}{\textbf{#1}}}
+\newcommand{\boat}[1]{\textcolor{Blue}{\textbf{#1}}}
+\newcommand{\warn}[1]{\textcolor{Red}{\textbf{#1}}}
+\newcommand{\myHead}[1]{{\LARGE\textsc{\textbf{#1}}}}
+\newcommand{\myhead}[1]{{\large\textsc{\textbf{#1}}}}
+% itemize
+\renewcommand{\labelitemi}{{$\bullet$\;}}
+\renewcommand{\labelitemii}{{$\bullet$\;}}
+\renewcommand{\labelitemiii}{$\bullet$\;}
+\renewcommand{\labelitemiv}{$\bullet$\;}
+% color bullets
+\newcommand{\bi}{\textcolor{ProcessBlue}{$\bullet$\;}}
+\newcommand{\ri}{\textcolor{Red}{$\bullet$\;}}
+\newcommand{\gi}{\textcolor{Green}{$\bullet$\;}}
+\newcommand{\yi}{\textcolor{Yellow}{$\bullet$\;}}
+\newcommand{\vi}{\textcolor{Plum}{$\bullet$\;}}
+\newcommand{\mi}{\textcolor{Magenta}{$\bullet$\;}}
+\newcommand{\oi}{\textcolor{Orange}{$\bullet$\;}}
+\newcommand{\ai}{\textcolor{Apricot}{$\bullet$\;}}
+\renewcommand{\ni}{\textcolor{Brown}{$\bullet$\;}}
+\newcommand{\si}{\textcolor{SpringGreen}{$\bullet$\;}}
+%
+\newcommand{\mr}[2]{\multirow{#1}{*}{#2}}
+\newcommand{\mcl}[2]{\multicolumn{#1}{|c|}{#2}}
+\newcommand{\tb}[1]{\textbf{#1}}
+\newcommand{\tp}[1]{\textsf{#1}}
+\renewcommand{\tp}[1]{\fontfamily{cmss}\selectfont #1}
+\newcommand{\refn}{Ref.\,\fontfamily{ppl}\selectfont\#\fontfamily{cmss}\selectfont}
+%
+% some info
+\pdfinfo{%
+  /Title    (FPP Training)
+  /Author   (funkyfranky)
+  /Creator  ()
+  /Producer ()
+  /Subject  ()
+  /Keywords (F/A-18C, Hornet, Kneeboard, Procedures)
+}
+%
+% Note: max 29 items per page
+\begin{document}
+\texttt{
+% RADIO COMMS
+\begin{itemize}
+ \item[] \myHead{Radio Comms}
+ %
+ \vspace{1em}
+ \item[] \myhead{CVN-74 USS Stennis}
+ \item[\bi] Marshal\dotfill\button{305.00\,MHz \grun{(B1)}}
+ \item[\bi] LSO\dotfill\button{264.00\,MHz \grun{(B2)}}
+ \item[\bi] Tower\dotfill\button{265.00\,MHz \grun{(B3)}}
+ \item[\gi] TACAN\dotfill\button{74X (STN)}
+ \item[\gi] ICLS\dotfill\button{1}
+ %
+ \vspace{1em}
+ \item[] \myhead{AWACS}
+ \item E-2D Wizard (overhead Stennis)
+ \begin{itemize}
+  \item[\bi] Frequency\dotfill\button{257.00\,MHz \grun{(B8)}}
+ \end{itemize}
+ \item E-3A Magic (West of Sukhumi/Gudauta)
+ \begin{itemize}
+  \item[\bi] Frequency\dotfill\button{255.00\,MHz \grun{(B9)}}
+ \end{itemize}
+ %
+ \vspace{1em}
+ \item[] \myhead{Tanker}
+ \item S-3B Texaco (overhead Stennis)
+ \begin{itemize}
+  \item[\bi] Frequency\dotfill\button{250.00\,MHz \grun{(B6)}}
+  \item[\gi] TACAN\dotfill\button{1Y (TEX)}
+ \end{itemize}
+ \item KC-135 Arco (30 NM West of Sukhumi)
+ \begin{itemize}
+  \item[\bi] Frequency\dotfill\button{270.00\,MHz \grun{(B7)}}
+  \item[\gi] TACAN\dotfill\button{2Y (ACO)}
+ \end{itemize} 
+ \item KC-135 Shell (30 NM West of Sukhumi)
+ \begin{itemize}
+  \item[\bi] Frequency\dotfill\button{270.00\,MHz \grun{(B7)}}
+  \item[\gi] TACAN\dotfill\button{3Y (SHL)}
+ \end{itemize}
+Note that Arco and Shell change shifts whenever either one\\runs out of fuel.\\
+ \vspace{1em}
+ \item[] \myhead{Bombing Ranges}
+ \item[\bi] Kutaisi Range Control\dotfill\button{256.00\,MHz \grun{(B4)}}
+ \item[\bi] Kobuleti X Range Control\dotfill\button{254.00\,MHz \grun{(B5)}}
+\end{itemize}
+% ---------------------------------------------------------------------------------------------------
+\newpage
+% BOMBING RANGE KOBULETI X
+\begin{itemize}
+ \item[] \myHead{Bombing Range Kobuleti X}
+ \item[\bi] Hit assessment on 254\,MHz
+ \item[\ri] Target: Unarmed Fuel Truck
+ \item[\mi] Position: N\DMS{41}{50}{31} E\DMS{41}{47}{52}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{../gimp/Range_Kobuleti_Sat.png}
+\end{center}
+\vspace*{1em}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{../gimp/Range_Kobuleti_Pic1.png}
+\end{center}
+\begin{itemize}
+ \item[\bi] Hit assessment on 254\,MHz
+\end{itemize}
+%
+% ---------------------------------------------------------------------------------------------------
+\newpage
+% BOMBING RANGE KUTAISI
+\begin{itemize}
+ \item[] \myHead{Bombing Range Kutaisi}
+ \item[\bi] Hit assessment on 256\,MHz
+ \item[\ri] Target: Tech Combine
+ \item[\mi] Position: N\DMS{042}{07}{32} E\DMS{42}{02}{36}
+\end{itemize}
+\begin{center}
+ \includegraphics[width=0.7\linewidth]{../gimp/Range_Kutaisi_Pic1.png}
+\end{center}
+\begin{itemize}
+ \item[\ri] Target: Unarmed Vehicles
+ \item[\mi] Position: unknown (moving)
+\end{itemize}
+\begin{center}
+ \includegraphics[width=0.7\linewidth]{../gimp/Range_Kutaisi_Mobile.png}
+\end{center}
+\begin{itemize}
+ \item[\bi] Hit assessment on 256\,MHz
+\end{itemize}
+%
+% ---------------------------------------------------------------------------------------------------
+\newpage
+% A2A DRONES
+\begin{itemize}
+ \item[] \myHead{Air-to-Air: Easy}
+ \item[\ri] Target: MiG-19 and MiG-21 drones
+ \item[\mi] Position: Near Maykop N\DMS{44}{19}{31} E\DMS{41}{47}{52}
+\end{itemize}
+\begin{center}
+ \includegraphics[width=0.7\linewidth]{../gimp/A2A_Drones.png}
+\end{center}
+%
+% ---------------------------------------------------------------------------------------------------
+\newpage
+% A2A CAP
+\begin{itemize}
+ \item[] \myHead{Air-to-Air: Hard}
+ \item[\ri] Target: Su-27
+ \item[\mi] Position: Near Mineralnye Vody
+ \item[\ri] Target: MiG-31
+ \item[\mi] Position: Near Mozdok
+\end{itemize}
+\begin{center}
+ \includegraphics[width=0.7\linewidth]{../gimp/A2A_Border.png}
+\end{center}
+%
+% ---------------------------------------------------------------------------------------------------
+\newpage
+% A2G FARP SKALA
+\begin{itemize}
+ \item[] \myHead{Air-to-Ground: Hard}
+ \item[\ri] Target: FARP Skala
+ \item[\mi] Position: N\DMS{43}{46}{49} E\DMS{44}{10}{12} (600 ft)
+ \item[\oi] Air Threads: Su-27, MiG-31
+ \item[\oi] Ground Threads: AAA ZU-23, Manpads
+\end{itemize}
+\begin{center}
+ \includegraphics[width=0.7\linewidth]{../gimp/FARP_Skala_Sat.png}
+\end{center}
+%
+\begin{center}
+ \includegraphics[width=0.7\linewidth]{../gimp/FARP_Skala_Pic.png}
+\end{center}
+%
+% ---------------------------------------------------------------------------------------------------
+\vspace{0.5em}
+\newpage
+% SEAD Krymsk
+\begin{itemize}
+ \item[] \myHead{SEAD Krymsk}
+ \item[\ri] Threat: SA-15 Gauntlet
+ \item[\mi] Position: N\DMS{44}{58}{12} E\DMS{37}{58}{50} (60 ft)
+\end{itemize}
+%
+\begin{center}
+\includegraphics[width=0.7\linewidth]{../gimp/SA15_Sat.png}
+\end{center}
+%
+\begin{itemize}
+ \item[\ri] Threat: SA-8 Gecko
+ \item[\mi] Position: N\DMS{44}{55}{19} E\DMS{38}{02}{32} (60 ft)
+\end{itemize}
+%
+\begin{center}
+\includegraphics[width=0.7\linewidth]{../gimp/SA8_Sat.png}
+\end{center}
+%
+% ---------------------------------------------------------------------------------------------------
+\newpage
+% SEAD SA-10
+\begin{itemize}
+ \item[] \myHead{SEAD Crimea}
+ \item[\ri] Threat: SA-10 Grumble
+ \item[\mi] Position: N\DMS{44}{45}{37} E\DMS{34}{33}{24} (20 ft)
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{../gimp/SA10_01.png}
+\end{center}
+\vspace{1em}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{../gimp/SA10_02.png}
+\end{center}
+% 
+}
+\end{document}
+%
