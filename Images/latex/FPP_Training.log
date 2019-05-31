@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/TeX Live for SUSE Linux) (preloaded format=pdflatex 2018.7.7)  31 MAY 2019 00:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/TeX Live for SUSE Linux) (preloaded format=pdflatex 2018.7.7)  31 MAY 2019 13:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1104,175 +1104,180 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 ABD: EveryShipout initializing macros
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 275.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 274.
 
 (/usr/share/texmf/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 LaTeX Font Info:    Font shape `T1/pcr/bx/sc' in size <20.74> not available
-(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 275.
+(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 274.
 LaTeX Font Info:    Font shape `T1/pcr/bx/sc' in size <14.4> not available
-(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 275.
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 275.
+(Font)              Font shape `T1/pcr/b/sc' tried instead on input line 274.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 274.
 
 
 (/usr/share/texmf/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 275.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 274.
 
 
 (/usr/share/texmf/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 275
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 274
 .
 
 (/usr/share/texmf/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 275
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 274
 .
 
 (/usr/share/texmf/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 275.
+(Font)              <12> on input line 274.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 275.
+(Font)              <8> on input line 274.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 275.
-LaTeX Font Info:    Try loading font information for U+msa on input line 275.
+(Font)              <6> on input line 274.
+LaTeX Font Info:    Try loading font information for U+msa on input line 274.
 
 (/usr/share/texmf/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 275.
+LaTeX Font Info:    Try loading font information for U+msb on input line 274.
 
 (/usr/share/texmf/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for U+wasy on input line 275.
+LaTeX Font Info:    Try loading font information for U+wasy on input line 274.
 
 (/usr/share/texmf/tex/latex/wasysym/uwasy.fd
 File: uwasy.fd 2003/10/30 v2.0 Wasy-2 symbol font definitions
 )
-LaTeX Font Info:    Try loading font information for U+stmry on input line 275.
+LaTeX Font Info:    Try loading font information for U+stmry on input line 274.
 
 
 (/usr/share/texmf/tex/latex/stmaryrd/Ustmry.fd)
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <12> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 275.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 274.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for TS1+pcr on input line 275.
+LaTeX Font Info:    Try loading font information for TS1+pcr on input line 274.
 
  (/usr/share/texmf/tex/latex/psnfss/ts1pcr.fd
 File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
 )
-<../gimp/Range_Kobuleti_Sat.png, id=12, 2569.6pt x 1445.4pt>
-File: ../gimp/Range_Kobuleti_Sat.png Graphic file (type png)
+<../_kneeboard/Range_Kobuleti_Sat.png, id=12, 2569.6pt x 1445.4pt>
+File: ../_kneeboard/Range_Kobuleti_Sat.png Graphic file (type png)
 
-<use ../gimp/Range_Kobuleti_Sat.png>
-Package pdftex.def Info: ../gimp/Range_Kobuleti_Sat.png used on input line 275.
-
+<use ../_kneeboard/Range_Kobuleti_Sat.png>
+Package pdftex.def Info: ../_kneeboard/Range_Kobuleti_Sat.png used on input lin
+e 274.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
 
-<../gimp/Range_Kobuleti_Pic1.png, id=14, 2569.6pt x 1445.4pt>
-File: ../gimp/Range_Kobuleti_Pic1.png Graphic file (type png)
+<../_kneeboard/Range_Kobuleti_Pic1.png, id=14, 2569.6pt x 1445.4pt>
+File: ../_kneeboard/Range_Kobuleti_Pic1.png Graphic file (type png)
 
-<use ../gimp/Range_Kobuleti_Pic1.png>
-Package pdftex.def Info: ../gimp/Range_Kobuleti_Pic1.png used on input line 275
-.
+<use ../_kneeboard/Range_Kobuleti_Pic1.png>
+Package pdftex.def Info: ../_kneeboard/Range_Kobuleti_Pic1.png used on input li
+ne 274.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
- [2 <../gimp/Range_Kobuleti_Sat.png> <../gimp/Range_Kobuleti_Pic1.png (PNG copy
-)>]
-<../gimp/Range_Kutaisi_Pic1.png, id=19, 2569.6pt x 1445.4pt>
-File: ../gimp/Range_Kutaisi_Pic1.png Graphic file (type png)
+ [2 <../_kneeboard/Range_Kobuleti_Sat.png> <../_kneeboard/Range_Kobuleti_Pic1.p
+ng (PNG copy)>]
+<../_kneeboard/Range_Kutaisi_Pic1.png, id=19, 2569.6pt x 1445.4pt>
+File: ../_kneeboard/Range_Kutaisi_Pic1.png Graphic file (type png)
 
-<use ../gimp/Range_Kutaisi_Pic1.png>
-Package pdftex.def Info: ../gimp/Range_Kutaisi_Pic1.png used on input line 275.
-
+<use ../_kneeboard/Range_Kutaisi_Pic1.png>
+Package pdftex.def Info: ../_kneeboard/Range_Kutaisi_Pic1.png used on input lin
+e 274.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
 
-<../gimp/Range_Kutaisi_Mobile.png, id=20, 2159.06625pt x 1078.0275pt>
-File: ../gimp/Range_Kutaisi_Mobile.png Graphic file (type png)
+<../_kneeboard/Range_Kutaisi_Mobile.png, id=20, 2159.06625pt x 1078.0275pt>
+File: ../_kneeboard/Range_Kutaisi_Mobile.png Graphic file (type png)
 
-<use ../gimp/Range_Kutaisi_Mobile.png>
-Package pdftex.def Info: ../gimp/Range_Kutaisi_Mobile.png used on input line 27
-5.
+<use ../_kneeboard/Range_Kutaisi_Mobile.png>
+Package pdftex.def Info: ../_kneeboard/Range_Kutaisi_Mobile.png used on input l
+ine 274.
 (pdftex.def)             Requested size: 318.66948pt x 159.1146pt.
- [3 <../gimp/Range_Kutaisi_Pic1.png> <../gimp/Range_Kutaisi_Mobile.png>]
-<../gimp/A2A_Drones.png, id=26, 579.3645pt x 699.8145pt>
-File: ../gimp/A2A_Drones.png Graphic file (type png)
+ [3 <../_kneeboard/Range_Kutaisi_Pic1.png> <../_kneeboard/Range_Kutaisi_Mobile.
+png>]
+<../_kneeboard/A2A_Drones.png, id=26, 579.3645pt x 699.8145pt>
+File: ../_kneeboard/A2A_Drones.png Graphic file (type png)
 
-<use ../gimp/A2A_Drones.png>
-Package pdftex.def Info: ../gimp/A2A_Drones.png used on input line 275.
+<use ../_kneeboard/A2A_Drones.png>
+Package pdftex.def Info: ../_kneeboard/A2A_Drones.png used on input line 274.
 (pdftex.def)             Requested size: 318.66948pt x 384.9312pt.
- [4 <../gimp/A2A_Drones.png>]
-<../gimp/A2A_Border.png, id=31, 608.2725pt x 531.1845pt>
-File: ../gimp/A2A_Border.png Graphic file (type png)
+ [4 <../_kneeboard/A2A_Drones.png>]
+<../_kneeboard/A2A_Border.png, id=31, 608.2725pt x 531.1845pt>
+File: ../_kneeboard/A2A_Border.png Graphic file (type png)
 
-<use ../gimp/A2A_Border.png>
-Package pdftex.def Info: ../gimp/A2A_Border.png used on input line 275.
+<use ../_kneeboard/A2A_Border.png>
+Package pdftex.def Info: ../_kneeboard/A2A_Border.png used on input line 274.
 (pdftex.def)             Requested size: 318.66948pt x 278.29245pt.
- [5 <../gimp/A2A_Border.png>]
-<../gimp/FARP_Skala_Sat.png, id=36, 2569.6pt x 1445.4pt>
-File: ../gimp/FARP_Skala_Sat.png Graphic file (type png)
+ [5 <../_kneeboard/A2A_Border.png>]
+<../_kneeboard/FARP_Skala_Sat.png, id=36, 2569.6pt x 1445.4pt>
+File: ../_kneeboard/FARP_Skala_Sat.png Graphic file (type png)
 
-<use ../gimp/FARP_Skala_Sat.png>
-Package pdftex.def Info: ../gimp/FARP_Skala_Sat.png used on input line 275.
+<use ../_kneeboard/FARP_Skala_Sat.png>
+Package pdftex.def Info: ../_kneeboard/FARP_Skala_Sat.png used on input line 27
+4.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
 
-<../gimp/FARP_Skala_Pic.png, id=37, 2567.5925pt x 1029.8475pt>
-File: ../gimp/FARP_Skala_Pic.png Graphic file (type png)
+<../_kneeboard/FARP_Skala_Pic.png, id=37, 2567.5925pt x 1029.8475pt>
+File: ../_kneeboard/FARP_Skala_Pic.png Graphic file (type png)
 
-<use ../gimp/FARP_Skala_Pic.png>
-Package pdftex.def Info: ../gimp/FARP_Skala_Pic.png used on input line 275.
+<use ../_kneeboard/FARP_Skala_Pic.png>
+Package pdftex.def Info: ../_kneeboard/FARP_Skala_Pic.png used on input line 27
+4.
 (pdftex.def)             Requested size: 318.66948pt x 127.80348pt.
- [6 <../gimp/FARP_Skala_Sat.png> <../gimp/FARP_Skala_Pic.png>] <../gimp/SA15_Sa
-t.png, id=43, 2569.6pt x 1445.4pt>
-File: ../gimp/SA15_Sat.png Graphic file (type png)
+ [6 <../_kneeboard/FARP_Skala_Sat.png> <../_kneeboard/FARP_Skala_Pic.png>]
+<../_kneeboard/SA15_Sat.png, id=43, 2569.6pt x 1445.4pt>
+File: ../_kneeboard/SA15_Sat.png Graphic file (type png)
 
-<use ../gimp/SA15_Sat.png>
-Package pdftex.def Info: ../gimp/SA15_Sat.png used on input line 275.
+<use ../_kneeboard/SA15_Sat.png>
+Package pdftex.def Info: ../_kneeboard/SA15_Sat.png used on input line 274.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
- <../gimp/SA8_Sat.png, id=44, 2569.6pt x 1445.4pt>
-File: ../gimp/SA8_Sat.png Graphic file (type png)
 
-<use ../gimp/SA8_Sat.png>
-Package pdftex.def Info: ../gimp/SA8_Sat.png used on input line 275.
+<../_kneeboard/SA8_Sat.png, id=44, 2569.6pt x 1445.4pt>
+File: ../_kneeboard/SA8_Sat.png Graphic file (type png)
+
+<use ../_kneeboard/SA8_Sat.png>
+Package pdftex.def Info: ../_kneeboard/SA8_Sat.png used on input line 274.
 (pdftex.def)             Requested size: 318.66948pt x 179.24098pt.
- [7 <../gimp/SA15_Sat.png> <../gimp/SA8_Sat.png>]
-<../gimp/SA10_01.png, id=51, 1599.9775pt x 1441.385pt>
-File: ../gimp/SA10_01.png Graphic file (type png)
+ [7 <../_kneeboard/SA15_Sat.png> <../_kneeboard/SA8_Sat.png>] <../_kneeboard/SA
+10_01.png, id=51, 1599.9775pt x 1441.385pt>
+File: ../_kneeboard/SA10_01.png Graphic file (type png)
 
-<use ../gimp/SA10_01.png>
-Package pdftex.def Info: ../gimp/SA10_01.png used on input line 275.
+<use ../_kneeboard/SA10_01.png>
+Package pdftex.def Info: ../_kneeboard/SA10_01.png used on input line 274.
 (pdftex.def)             Requested size: 318.66948pt x 287.06224pt.
- <../gimp/SA10_02.png, id=52, 2320.67pt x 1063.975pt>
-File: ../gimp/SA10_02.png Graphic file (type png)
 
-<use ../gimp/SA10_02.png>
-Package pdftex.def Info: ../gimp/SA10_02.png used on input line 275.
+<../_kneeboard/SA10_02.png, id=52, 2320.67pt x 1063.975pt>
+File: ../_kneeboard/SA10_02.png Graphic file (type png)
+
+<use ../_kneeboard/SA10_02.png>
+Package pdftex.def Info: ../_kneeboard/SA10_02.png used on input line 274.
 (pdftex.def)             Requested size: 318.66948pt x 146.09813pt.
- [8 <../gimp/SA10_01.png> <../gimp/SA10_02.png>]
-(./FPP_Training.aux) ) 
+ [8 <../_kneeboard/SA10_01.png> <../_kneeboard/SA10_02.png>] (./FPP_Training.au
+x) ) 
 Here is how much of TeX's memory you used:
  15101 strings out of 494035
- 275675 string characters out of 6158522
- 313855 words of memory out of 5000000
+ 275969 string characters out of 6158522
+ 313857 words of memory out of 5000000
  18112 multiletter control sequences out of 15000+600000
  25893 words of font info for 54 fonts, out of 8000000 for 9000
  475 hyphenation exceptions out of 8191
  55i,5n,54p,414b,245s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/dvips/base/8r.enc}{/usr/share
-/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}</usr/share/texmf/fonts/type1/public/lm
-/lmsy10.pfb></usr/share/texmf/fonts/type1/urw/courier/ucrb8a.pfb></usr/share/te
-xmf/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on FPP_Training.pdf (8 pages, 23172328 bytes).
+{/usr/share/texmf/fonts/enc/dvips/base/8r.enc}{/usr/share/texmf/fonts/enc/d
+vips/lm/lm-mathsy.enc}</usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/
+share/texmf/fonts/type1/urw/courier/ucrb8a.pfb></usr/share/texmf/fonts/type1/ur
+w/courier/ucrr8a.pfb>
+Output written on FPP_Training.pdf (8 pages, 23169340 bytes).
 PDF statistics:
  72 PDF objects out of 1000 (max. 8388607)
  35 compressed objects within 1 object stream
