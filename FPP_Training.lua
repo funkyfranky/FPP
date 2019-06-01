@@ -1,6 +1,6 @@
 -------------------------
 -- FPP Practice Script --
--- v0.7 by funkyfranky --
+-- v0.8 by funkyfranky --
 -------------------------
 
 -- Enable/disable modules.
@@ -34,6 +34,7 @@ zone.Skala=ZONE:New("Zone Skala FARP") --Core.Zone#ZONE
 zone.CAPwest=ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West")) --Core.Zone#ZONE_POLYGON
 zone.CAPeast=ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName("CAP Zone East")) --Core.Zone#ZONE_POLYGON
 zone.CCCPboarder=ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border")) --Core.Zone#ZONE_POLYGON
+zone.SkalaSpawnzone=ZONE:New("Skala Spawn Zone") --Core.Zone#ZONE_POLYGON
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- RADIO COMMS
@@ -218,6 +219,8 @@ if Warehouse then
   warehouse.maykop   = WAREHOUSE:New(STATIC:FindByName("Warehouse Maykop"))   --Functional.Warehouse#WAREHOUSE
   warehouse.beslan   = WAREHOUSE:New(STATIC:FindByName("Warehouse Beslan"))   --Functional.Warehouse#WAREHOUSE
   warehouse.nalchik  = WAREHOUSE:New(STATIC:FindByName("Warehouse Nalchik"))  --Functional.Warehouse#WAREHOUSE
+  warehouse.mozdok   = WAREHOUSE:New(STATIC:FindByName("Warehouse Mozdok"))   --Functional.Warehouse#WAREHOUSE
+  warehouse.krymsk   = WAREHOUSE:New(STATIC:FindByName("Warehouse Krymsk"))   --Functional.Warehouse#WAREHOUSE
   warehouse.skala    = WAREHOUSE:New(STATIC:FindByName("Skala Command Post")) --Functional.Warehouse#WAREHOUSE
   
   -- Start warehouses.
@@ -261,38 +264,43 @@ if Warehouse then
     local c2=c1:Translate(UTILS.NMToMeters(50), 270):SetAltitude(altitude)
     
     -- 
-    local tacanch=4
+    local tacanch=3
     local tacanmorse="SHL"
     local callsign=CALLSIGN.Tanker.Shell
     local tankerRTB="Shell RTB"
     if arco then
-      tacanch=3
+      tacanch=2
       tacanmorse="ACO"
       callsign=CALLSIGN.Tanker.Arco
       tankerRTB="Arco RTB"
       ArcoRTB:Set(1)
+      env.info("FF shift arco")
     else
       ShellRTB:Set(1)
+      env.info("FF shift shell")
     end
     
     -- Orbit in race track pattern.
     local TaskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
     
-    -- Orbit until flag=2
-    local TaskCondition=group:TaskCondition(nil, tankerRTB, 2, nil, nil, nil)
+    -- Orbit until flag=2.
+    --local TaskCondition=group:TaskCondition(nil, tankerRTB, 2, nil, nil, nil)
+    local TaskCondition=group:TaskCondition(nil, tankerRTB, nil, nil, 5*60, nil)
     
-    -- Controlled Task.
+    -- Controlled Task: orbit until flag value is 2.
     local TaskControlled=group:TaskControlled(TaskOrbit, TaskCondition)
     
     -- Define waypoints.
     local wp={}
     wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {TaskControlled}, "Tanker")
+    --wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {TaskControlled}, "Tanker")
+    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {TaskOrbit}, "Tanker")
     wp[3]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirLanding(UTILS.MpsToKmph(speed), warehouse.kobuleti:GetAirbase(), {}, "Landing Kobuleti")
     
     group:StartUncontrolled()
             
     local TaskRoute=group:TaskRoute(wp)
+
     local TaskTanker=group:EnRouteTaskTanker()
     local TaskCombo=group:TaskCombo({TaskTanker, TaskRoute})
     
@@ -303,13 +311,12 @@ if Warehouse then
     local beacon=BEACON:New(unit)
     beacon:ActivateTACAN(tacanch, "Y", tacanmorse, true)
     group:CommandSetCallsign(callsign, 1, 1)
-    
-    -- Invert switch.
-    arco=not arco
-    
-    group:OptionROTNoReaction()
+    group:OptionROTNoReaction()      
     
     group:SetTask(TaskCombo, 1)
+    
+    -- Invert switch.
+    arco=not arco    
   end
 
   --- AWACS setup.
@@ -392,17 +399,39 @@ if Warehouse then
       elseif assignment=="Tanker" then
         if arco then
           -- Send Arco home.
+          env.info("FF Sending Arco home due to low fuel.")
           ArcoRTB:Set(2)
         else
           -- Send Shell home.
+          env.info("FF Sending Shell home due to low fuel.")
           ShellRTB:Set(2)
         end
       end
     
-      -- Send new tanker.
+      -- Send new Tanker or AWACS.
       warehouse.kobuleti:AddRequest(warehouse.kobuleti, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
     end
     
+  end
+
+  ------------
+  -- Krymsk --
+  ------------
+    
+  -- Add IL-76 assets.
+  warehouse.krymsk:AddAsset("IL-76 Group", 5)
+  
+  -- Transfer IL-76 to Mozdok.
+  warehouse.krymsk:__AddRequest(40, warehouse.mozdok, WAREHOUSE.Descriptor.GROUPNAME, "IL-76 Group", 1, nil, nil, nil, "Transport Flight")
+  
+  
+  function warehouse.krymsk:OnAfterAssetSpawned(From,Event,To,group,_asset,_request)
+    local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem
+    
+    -- Spawn a transport flight every 30 min.
+    if request.assignment=="Transport Flight" then
+      self:__AddRequest(30*60, warehouse.mozdok, request.assetdesc, request.assetdescval, 1, nil, nil, nil, request.assignment)
+    end
   end
     
   ------------
@@ -530,6 +559,8 @@ if Warehouse then
   warehouse.skala:AddAsset("Infantry Rus Group 5", 20)
   warehouse.skala:AddAsset("SA-18 Manpad Group", 20)
   
+  warehouse.skala:SetSpawnZone(zone.SkalaSpawnzone)
+  
   -- Spawn some infantry and manpads.
   warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "Infantry Rus Group 5", 3, nil, nil, nil, "Patrol")
   warehouse.skala:AddRequest(warehouse.skala, WAREHOUSE.Descriptor.GROUPNAME, "SA-18 Manpad Group", 3, nil, nil, nil, "Patrol")
@@ -544,7 +575,9 @@ if Warehouse then
     if assignment=="Patrol" then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
-        group:PatrolZones({zone.Skala}, group:GetSpeedMax()*0.5, "Custom")
+        local speed=group:GetSpeedMax()*0.5
+        env.info(string.format("FF speed = %.1f km/h", speed))
+        group:PatrolZones({zone.Skala}, speed, "Custom")
       end
     end
   end  
@@ -593,7 +626,7 @@ end
 if Stennis then
 
   -- Set mission menu.
-  AIRBOSS.MenuF10Root=MENU_MISSION:New("Airboss").MenuPath
+  AIRBOSS.MenuF10Root=MENU_MISSION:New("CVN-74 Stennis").MenuPath
   
   -- Path is in DCS log directory.
   local savepath=nil 
@@ -633,15 +666,15 @@ if Stennis then
   local AirbossStennis=AIRBOSS:New("USS Stennis")
   
   -- Add recovery windows:
-  local window1=AirbossStennis:AddRecoveryWindow(  "7:30",  "8:30", 1, nil, true, 25)
-  local window2=AirbossStennis:AddRecoveryWindow(  "9:30", "10:30", 1, nil, true, 25)
-  local window3=AirbossStennis:AddRecoveryWindow( "11:30", "12:30", 1, nil, true, 25)
-  local window3=AirbossStennis:AddRecoveryWindow( "13:30", "14:30", 1, nil, true, 25)
-  local window3=AirbossStennis:AddRecoveryWindow( "15:30", "16:30", 1, nil, true, 25)
-  local window3=AirbossStennis:AddRecoveryWindow( "17:30", "18:30", 1, nil, true, 25)
-  local window3=AirbossStennis:AddRecoveryWindow( "19:30", "20:30", 1, nil, true, 25)
+  local window1=AirbossStennis:AddRecoveryWindow(  "7:30",  "8:30", 1, nil, true, 25, true)
+  local window2=AirbossStennis:AddRecoveryWindow(  "9:30", "10:30", 1, nil, true, 25, true)
+  local window3=AirbossStennis:AddRecoveryWindow( "11:30", "12:30", 1, nil, true, 25, true)
+  local window3=AirbossStennis:AddRecoveryWindow( "13:30", "14:30", 1, nil, true, 25, true)
+  local window3=AirbossStennis:AddRecoveryWindow( "15:30", "16:30", 1, nil, true, 25, true)
+  local window3=AirbossStennis:AddRecoveryWindow( "17:30", "18:30", 1, nil, true, 25, true)
+  local window3=AirbossStennis:AddRecoveryWindow( "19:30", "20:30", 1, nil, true, 25, true)
   -- Case III with +30 degrees holding offset from 21:30 to 7:30 next day.
-  local window3=AirbossStennis:AddRecoveryWindow("21:30", "7:30:00+1", 3, 30, true, 25)
+  local window3=AirbossStennis:AddRecoveryWindow("21:30", "7:30:00+1", 3, 30, true, 25, true)
   
   -- Load all saved player grades from your "Saved Games\DCS" folder (if lfs was desanitized).
   AirbossStennis:Load(savepath, "FPP-Greenieboard.csv")
@@ -673,6 +706,30 @@ if Stennis then
   
   -- Start airboss class.
   AirbossStennis:Start()
+
+  -- Start recovery function.
+  local function StartRecovery(case)
+  
+    -- Recovery staring in 5 min for 30 min.
+    local t0=timer.getAbsTime()+5*60
+    local t9=t0+30*60
+    local C0=UTILS.SecondsToClock(t0)
+    local C9=UTILS.SecondsToClock(t9)
+  
+    -- Carrier will turn into the wind. Wind on deck 25 knots. U-turn on.
+    AirbossStennis:AddRecoveryWindow(C0, C9,case, 30, true, 25, true)
+  end
+  
+  -- Stop recovery function.
+  local function StopRecovery()
+    AirbossStennis:RecoveryStop()
+  end
+  
+  local menucarriercontrol=MENU_COALITION:New(AirbossStennis:GetCoalition(), "Carrier Control")
+  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Start CASE I",   menucarriercontrol, StartRecovery, 1)
+  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Start CASE II",  menucarriercontrol, StartRecovery, 2)
+  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Start CASE III", menucarriercontrol, StartRecovery, 3)
+  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Stop Recovery",  menucarriercontrol, StopRecovery)  
   
 end
 
@@ -810,6 +867,11 @@ function eventhandler:OnEventDead(_EventData)
     -- Respawn SAM sites after 10 min if one unit is dead.
     if groupname=="SA-10" or groupname=="SA-15 Krymsk" or groupname=="SA-8 Krymsk" then
       BASE:ScheduleOnce(10*60, GROUP.Respawn, EventData.IniGroup)
+    end
+    
+    -- Respawn AAA after 30 min.
+    if groupname=="Skala ZU-23 Group 1" or groupname=="Skala ZU-23 Group 2" then
+      BASE:ScheduleOnce(30*60, GROUP.Respawn, EventData.IniGroup)
     end
   
   end
