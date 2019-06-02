@@ -301,6 +301,7 @@ if Warehouse then
             
     local TaskRoute=group:TaskRoute(wp)
 
+    -- Enroute task tanker and route.
     local TaskTanker=group:EnRouteTaskTanker()
     local TaskCombo=group:TaskCombo({TaskTanker, TaskRoute})
     
@@ -353,8 +354,8 @@ if Warehouse then
   warehouse.kobuleti:AddAsset("E-3A Group", 2)
   warehouse.kobuleti:AddAsset("KC-135 Group", 2)
   
-  -- Debug testing.
-  --warehouse.kobuleti:SetLowFuelThreshold(0.95)
+  -- Set low fuel to 6%.
+  warehouse.kobuleti:SetLowFuelThreshold(0.06)
 
   
   -- Self request AWACS.
@@ -399,11 +400,11 @@ if Warehouse then
       elseif assignment=="Tanker" then
         if arco then
           -- Send Arco home.
-          env.info("FF Sending Arco home due to low fuel.")
+          env.info("FPP Sending Arco home due to low fuel.")
           ArcoRTB:Set(2)
         else
           -- Send Shell home.
-          env.info("FF Sending Shell home due to low fuel.")
+          env.info("FPP Sending Shell home due to low fuel.")
           ShellRTB:Set(2)
         end
       end
@@ -576,7 +577,7 @@ if Warehouse then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
         local speed=group:GetSpeedMax()*0.5
-        env.info(string.format("FF speed = %.1f km/h", speed))
+        env.info(string.format("FPP Group %s Patrol Speed = %.1f km/h", group:GetName(), speed))
         group:PatrolZones({zone.Skala}, speed, "Custom")
       end
     end
@@ -698,6 +699,9 @@ if Stennis then
   -- Single carrier menu optimization.
   AirbossStennis:SetMenuSingleCarrier()
   
+  -- Enable skipper menu.
+  --AirbossStennis:SetMenuRecovery(15, 30, true)
+  
   -- Remove landed AI planes from flight deck.
   AirbossStennis:SetDespawnOnEngineShutdown()
   
@@ -706,31 +710,6 @@ if Stennis then
   
   -- Start airboss class.
   AirbossStennis:Start()
-
-  -- Start recovery function.
-  local function StartRecovery(case)
-  
-    -- Recovery staring in 5 min for 30 min.
-    local t0=timer.getAbsTime()+5*60
-    local t9=t0+30*60
-    local C0=UTILS.SecondsToClock(t0)
-    local C9=UTILS.SecondsToClock(t9)
-  
-    -- Carrier will turn into the wind. Wind on deck 25 knots. U-turn on.
-    AirbossStennis:AddRecoveryWindow(C0, C9,case, 30, true, 25, true)
-  end
-  
-  -- Stop recovery function.
-  local function StopRecovery()
-    AirbossStennis:RecoveryStop()
-  end
-  
-  local menucarriercontrol=MENU_COALITION:New(AirbossStennis:GetCoalition(), "Carrier Control")
-  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Start CASE I",   menucarriercontrol, StartRecovery, 1)
-  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Start CASE II",  menucarriercontrol, StartRecovery, 2)
-  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Start CASE III", menucarriercontrol, StartRecovery, 3)
-  MENU_COALITION_COMMAND:New(AirbossStennis:GetCoalition(), "Stop Recovery",  menucarriercontrol, StopRecovery)  
-  
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
