@@ -1,0 +1,16 @@
+mapResource = 
+{
+    ["ResKey_ImageBriefing_447"] = "FPP-Kneeboard-06.png",
+    ["ResKey_ImageBriefing_448"] = "FPP-Kneeboard-07.png",
+    ["ResKey_ImageBriefing_444"] = "FPP-Kneeboard-03.png",
+    ["ResKey_Action_27"] = "FPP_Training.lua",
+    ["ResKey_ImageBriefing_449"] = "FPP-Kneeboard-08.png",
+    ["ResKey_ImageBriefing_442"] = "FPP-Kneeboard-01.png",
+    ["ResKey_Action_26"] = "Moose.lua",
+    ["ResKey_ImageBriefing_445"] = "FPP-Kneeboard-04.png",
+    ["ResKey_ImageBriefing_419"] = "FPP-02-TrainingMapS.png",
+    ["ResKey_ImageBriefing_443"] = "FPP-Kneeboard-02.png",
+    ["ResKey_ImageBriefing_446"] = "FPP-Kneeboard-05.png",
+    ["ResKey_ImageBriefing_420"] = "FPP-03-BombingRangesS.png",
+    ["ResKey_ImageBriefing_417"] = "FPP-01-MainS.png",
+} -- end of mapResource
