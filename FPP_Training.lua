@@ -1,6 +1,6 @@
 -------------------------
 -- FPP Practice Script --
--- v0.8 by funkyfranky --
+-- v0.9 by funkyfranky --
 -------------------------
 
 -- Enable/disable modules.
@@ -43,7 +43,7 @@ zone.SkalaSpawnzone=ZONE:New("Skala Spawn Zone") --Core.Zone#ZONE_POLYGON
 -- Instructor radio frequency 305.00 MHz.
 local instructorfreq=305
 
--- Kobuleti range control radio frequency 264.00 MHz.
+-- Kobuleti and Kutaisi range control radio frequencies.
 local rangecontrolfreq={}
 rangecontrolfreq.KobuletiX=254
 rangecontrolfreq.Kutaisi=256
@@ -130,7 +130,7 @@ if Range then
     myrange:Start()    
   end
   
-  -- Big fire
+  -- Big smoke (probably useless in MP due to sync problems).
   zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.1)
   zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.2)
   zone.kutaisirange:GetRandomCoordinate():BigSmokeLarge(0.3)
@@ -171,7 +171,7 @@ if Range then
     
       -- Debug text message.
       local text=string.format("You should now hear a radio message on %.2f MHz that you entered the bombing range and switch to %.2f MHz.", rangecontrolfreq[rangename], rangecontrolfreq[rangename])
-      MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
+      --MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
         
       -- Range control radio frequency split.
       local RF=UTILS.Split(string.format("%.2f", rangecontrolfreq[rangename]), ".")
@@ -192,7 +192,7 @@ if Range then
     
       -- Debug text message.
       local text=string.format("You should now hear a radio message on %.2f MHz that you left the bombing range.", rangecontrolfreq[rangename])
-      MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
+      --MESSAGE:New(text, 15, "Debug", false):ToClient(player.client)
       
       -- Radio message player left.
       if RadioComms then
@@ -257,13 +257,16 @@ if Warehouse then
   --- Tanker setup.
   local function StartTanker(_group)
     local group=_group --Wrapper.Group#GROUP
+    
+    -- Set speed and altitude.
     local speed=UTILS.KnotsToMps(350)
     local altitude=UTILS.FeetToMeters(25000)
     
+    -- Race-track orbit of 50 NM length.
     local c1=zone.tanker:GetCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
     local c2=c1:Translate(UTILS.NMToMeters(50), 270):SetAltitude(altitude)
     
-    -- 
+    -- Set TACAN and callsign.
     local tacanch=3
     local tacanmorse="SHL"
     local callsign=CALLSIGN.Tanker.Shell
@@ -274,10 +277,10 @@ if Warehouse then
       callsign=CALLSIGN.Tanker.Arco
       tankerRTB="Arco RTB"
       ArcoRTB:Set(1)
-      env.info("FF shift arco")
+      env.info("FPP shift arco")
     else
       ShellRTB:Set(1)
-      env.info("FF shift shell")
+      env.info("FPP shift shell")
     end
     
     -- Orbit in race track pattern.
@@ -299,6 +302,7 @@ if Warehouse then
     
     group:StartUncontrolled()
             
+    -- Task route.
     local TaskRoute=group:TaskRoute(wp)
 
     -- Enroute task tanker and route.
@@ -312,7 +316,7 @@ if Warehouse then
     local beacon=BEACON:New(unit)
     beacon:ActivateTACAN(tacanch, "Y", tacanmorse, true)
     group:CommandSetCallsign(callsign, 1, 1)
-    group:OptionROTNoReaction()      
+    group:OptionROTNoReaction()
     
     group:SetTask(TaskCombo, 1)
     
@@ -324,6 +328,7 @@ if Warehouse then
   local function StartAWACS(_group)
     local group=_group --Wrapper.Group#GROUP
     
+    -- Set speed and altitude.
     local speed=UTILS.KnotsToMps(300)
     local altitude=UTILS.FeetToMeters(20000)
     
@@ -343,6 +348,7 @@ if Warehouse then
     local TaskAWACS=group:EnRouteTaskAWACS()
     local TaskCombo=group:TaskCombo({TaskAWACS, TaskRoute})
     
+    -- Set callsign, ROE and data link.
     group:CommandSetCallsign(CALLSIGN.AWACS.Magic, 1, 1)
     group:OptionROTNoReaction()
     group:CommandEPLRS(true, 2)
@@ -369,6 +375,7 @@ if Warehouse then
     local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem    
     local assignment=self:GetAssignment(request)
     
+    -- Init AWACS.
     if assignment=="AWACS" then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
@@ -377,6 +384,7 @@ if Warehouse then
       end
     end
     
+    -- Init tanker.
     if assignment=="Tanker" then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
@@ -485,7 +493,7 @@ if Warehouse then
     warehouse.maykop:AddAsset(drone, 50)
   end
   
-  
+  -- Launch eight drones.
   for i=1,8 do
     local r=math.random(2)
     local drone=drones[r]
@@ -545,11 +553,6 @@ if Warehouse then
     if request.assignment=="Drone" then
       warehouse.maykop:AddRequest(warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, request.assignment)
     end
-  end
-  
-  function warehouse.maykop:OnAfterAssetSpawned(From,Event,To,_group,_asset)
-    local group=_group --Wrapper.Group#GROUP
-    --group:GetUnit(1):Explode(500, 5*60)
   end
   
   ----------------
@@ -644,10 +647,11 @@ if Stennis then
   tanker:SetTACAN(1, "TEX")
   tanker:Start()
   
-  -- E-2D AWACS spawning in air
+  -- E-2D AWACS spawning in air.
   local awacs=RECOVERYTANKER:New("USS Stennis", "E-2D Group")
+  awacs:SetTakeoffAir()
   awacs:SetAWACS()
-  awacs:SetRadio(260)
+  awacs:SetRadio(257)
   awacs:SetAltitude(20000)
   awacs:SetCallsign(CALLSIGN.AWACS.Wizard)
   awacs:SetRacetrackDistances(30, 15)
@@ -655,8 +659,7 @@ if Stennis then
   awacs:SetTACANoff()
   awacs:__Start(1)
   
-  -- Rescue Helo spawned in air with home base USS Perry.
-  -- Has to be a global object!
+  -- Rescue Helo spawned in air with home base USS Ford. Has to be a global object!
   rescuehelo=RESCUEHELO:New("USS Stennis", "Rescue Helo Group")
   rescuehelo:SetHomeBase(AIRBASE:FindByName("USS Ford"))
   rescuehelo:SetTakeoffAir()
@@ -694,13 +697,13 @@ if Stennis then
   AirbossStennis:SetExcludeAI(CarrierExcludeSet)
   
   -- Enable trap sheet.
-  AirbossStennis:SetTrapSheet(savepath, "FPP-Trapsheet")
+  --AirbossStennis:SetTrapSheet(savepath, "FPP-Trapsheet")
    
   -- Single carrier menu optimization.
   AirbossStennis:SetMenuSingleCarrier()
   
   -- Enable skipper menu.
-  --AirbossStennis:SetMenuRecovery(15, 30, true)
+  AirbossStennis:SetMenuRecovery(15, 30, true)
   
   -- Remove landed AI planes from flight deck.
   AirbossStennis:SetDespawnOnEngineShutdown()
