@@ -15,7 +15,6 @@ local Scoring=false
 -- No MOOSE settings menu.
 _SETTINGS:SetPlayerMenuOff()
 
-
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Zones
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -34,15 +33,22 @@ zone.KobuletiRangeTechCombine=ZONE:New("Zone Range Kobuleti Tech Combine") --Cor
 zone.KobuletiRangeAmmoDepot=ZONE:New("Zone Range Kobuleti Ammo Depot") --Core.Zone#ZONE
 zone.KobuletiRangeTrain=ZONE:New("Zone Range Kobuleti Train") --Core.Zone#ZONE
 
-
+-- SAM zones.
 zone.SAMKrim=ZONE:New("Zone SAM Krim") --Core.Zone#ZONE
 zone.SAMKrymsk=ZONE:New("Zone SAM Krymsk") --Core.Zone#ZONE
 
+-- A2A zone around Maykop
 zone.Maykop=ZONE:New("Zone Drone Maykop") --Core.Zone#ZONE
 
 -- FARP Skala.
 zone.Skala=ZONE:New("Zone Skala FARP") --Core.Zone#ZONE
 zone.SkalaSpawn=ZONE:New("Skala Spawn Zone") --Core.Zone#ZONE_POLYGON
+
+-- Red capture zones.
+zone.Mozdok=ZONE:New("Zone Mozdok")         --Core.Zone#ZONE
+zone.Nalchik=ZONE:New("Zone Nalchik")       --Core.Zone#ZONE
+zone.Beslan=ZONE:New("Zone Beslan")         --Core.Zone#ZONE
+zone.Mineralnye=ZONE:New("Zone Mineralnye") --Core.Zone#ZONE
 
 -- Red border.
 zone.CAPwest=ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West")) --Core.Zone#ZONE_POLYGON
@@ -142,9 +148,13 @@ if Range then
   range.Krymsk=RANGE:New("Krymsk")  --Functional.Range#RANGE
   range.Krymsk:SetRangeZone(zone.SAMKrymsk)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #001"):GetCoordinate(), "Bunker 1", 50)
-  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #001"):GetCoordinate(), "Tu-22 #001", 50)
-  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #002"):GetCoordinate(), "Tu-22 #002", 50)
-  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #003"):GetCoordinate(), "Tu-22 #003", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #001"):GetCoordinate(), "Tu-22 #01", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #002"):GetCoordinate(), "Tu-22 #02", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #003"):GetCoordinate(), "Tu-22 #03", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Locomotive #001"):GetCoordinate(), "Train", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Tech Combine #001"):GetCoordinate(), "Tech Combine", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #001"):GetCoordinate(), "Bunker #01", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #002"):GetCoordinate(), "Bunker #02", 50)
   
   
   -- Start ranges.
@@ -897,11 +907,17 @@ if A2AD then
   A2ADispatcher:SetEngageRadius(120000)
   
   -- Setup the squadrons.
-  --A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27", "SQ CCCP MIG-23MLD", "SQ CCCP MIG-25PD" }, 16)
-  A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27"},  32)
-  A2ADispatcher:SetSquadron("Mozdok",     AIRBASE.Caucasus.Mozdok,          {"SQ CCCP MIG-31"}, 32)
+  A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27"},    10)
+  A2ADispatcher:SetSquadron("Nalchik",    AIRBASE.Caucasus.Nalchik,         {"SQ CCCP MIG-25PD"}, 10)
+  A2ADispatcher:SetSquadron("Beslan",     AIRBASE.Caucasus.Beslan,          {"SQ CCCP MIG-25PD"}, 10)
+  A2ADispatcher:SetSquadron("Mozdok",     AIRBASE.Caucasus.Mozdok,          {"SQ CCCP MIG-31"},   20)
   
-  local Squadrons={"Mineralnye", "Mozdok"}
+  local Squadrons={"Mineralnye", "Mozdok", "Beslan", "Nalchik"}
+  
+  A2ADispatcher:SetSquadronCap("Mineralnye", zone.CAPwest, 6000, 12000, 500, 600, 800, 1100, "BARO")
+  A2ADispatcher:SetSquadronCap("Mozdok",     zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
+  A2ADispatcher:SetSquadronCap("Nalchik",    zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
+  A2ADispatcher:SetSquadronCap("Beslan",     zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
   
   for _,squadron in pairs(Squadrons) do
     A2ADispatcher:SetSquadronOverhead(squadron, 1.0)
@@ -911,9 +927,6 @@ if A2AD then
     A2ADispatcher:SetSquadronGci(squadron, 900, 1200)
   end
   
-  A2ADispatcher:SetSquadronCap("Mineralnye", zone.CAPwest, 6000, 12000, 500, 600, 800, 1100, "BARO")
-  A2ADispatcher:SetSquadronCap("Mozdok",     zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
-
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -937,93 +950,285 @@ if Scoring then
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Zone Capturing
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+local beslanEmpty=false
+local beslanCaptured=false
+
+local nalchikEmpty=false
+local nalchikCaptured=false
+
+local mozdokEmpty=false
+local mozdokCaptured=false
+
+local mineralnyeEmpty=false
+local mineralnyeCaptured=false
+
+local function zoneScan(_zone)
+  local zone=_zone --Core.Zone#ZONE_RADIUS
+
+  -- Scan zone
+  local _,_,_,units,statics=zone:GetCoordinate():ScanObjects(zone.Radius, true, true, false)
+  
+  local nred=0 ; local nblue=0
+  for _,_unit in pairs(units) do
+    local unit=_unit --Wrapper.Unit#UNIT
+    local _coalition=unit:GetCoalition()
+    local category=unit:GetCategory()
+    
+    if category==Group.Category.GROUND then
+      if _coalition==coalition.side.RED then
+        nred=nred+1
+      elseif _coalition==coalition.side.BLUE then
+        nblue=nblue+1
+      end
+    end
+  end
+
+  return nred,nblue
+end
+
+local function CheckZones()
+
+  -- Count units in capture zones.
+  local nRedMozdok,nBlueMozdok=zoneScan(zone.Mozdok)
+  local nRedNalchik,nBlueNalchik=zoneScan(zone.Nalchik)
+  local nRedBeslan,nBlueBeslan=zoneScan(zone.Beslan)
+  local nRedMineralnye,nBlueMineralnye=zoneScan(zone.Mineralnye)
+  
+  -- Debug info.
+  env.info(string.format("FF Units Beslan: nRed=%d nBlue=%d", nRedBeslan, nBlueBeslan))
+  env.info(string.format("FF Units Nalchik: nRed=%d nBlue=%d", nRedNalchik, nBlueNalchik))
+  env.info(string.format("FF Units Mineralnye: nRed=%d nBlue=%d", nRedMineralnye, nBlueMineralnye))
+  env.info(string.format("FF Units Mozdok: nRed=%d nBlue=%d", nRedMozdok, nBlueMozdok))
+  
+  local text=""
+  
+  -- Check if Beslan is empty.
+  if nRedBeslan<=0 and not beslanEmpty then
+  
+    -- Inform coalition.
+    text=text..string.format("Red forces at airbase Beslan eliminated! Ground troops are on their way to capture the base.")
+
+    -- Send blue ground to capture airbase.
+    local spawn=SPAWN:New("Capture Beslan Blue")
+    local group=spawn:Spawn()
+
+    -- Make sure this is not done again.
+    beslanEmpty=true
+  end
+
+  -- Check if Nalchik is empty.
+  if nRedNalchik<=0 and not nalchikEmpty then
+  
+    -- Inform coalition.
+    text=text..string.format("Red forces at airbase Nalchik eliminated! Ground troops are on their way to capture the base.")
+
+    -- Send blue ground to capture airbase.
+    local spawn=SPAWN:New("Capture Nalchik Blue")
+    local group=spawn:Spawn()
+
+    -- Make sure this is not done again.
+    nalchikEmpty=true
+  end
+
+  -- Check if Mineralnye is empty.
+  if nRedMineralnye<=0 and not mineralnyeEmpty then
+  
+    -- Inform coalition.
+    text=text..string.format("Red forces at airbase Mineralnye Vody eliminated! Ground troops are on their way to capture the base.")
+
+    -- Send blue ground to capture airbase.
+    local spawn=SPAWN:New("Capture Mineralnye Blue")
+    local group=spawn:Spawn()
+
+    -- Make sure this is not done again.
+    mineralnyeEmpty=true
+  end
+
+  -- Check if Mozdok is empty.
+  if nRedMozdok<=0 and not mozdokEmpty then
+  
+    -- Inform coalition.
+    text=text..string.format("Red forces at airbase Mozdok eliminated! Ground troops are on their way to capture the base.")
+    
+    -- Send blue ground to capture airbase.
+    local spawn=SPAWN:New("Capture Mozdok Blue")
+    local group=spawn:Spawn()
+
+    -- Make sure this is not done again.
+    mozdokEmpty=true
+  end
+  
+  if text~="" then
+    env.info("FPP "..text)
+    MESSAGE:New(text, 30, nil, true):ToBlue()
+  end
+  
+end
+
+-- Check zones every 30 sec.
+local zoneCheck,zoneCheckID=SCHEDULER:New(nil, CheckZones, {}, 30, 30)
+
+local function CheckCapturedRedZones()
+  
+  local n=0
+  if mozdokCaptured then
+    n=n+1
+  end
+  if beslanCaptured then
+    n=n+1
+  end
+  if mineralnyeCaptured then
+    n=n+1
+  end
+  if nalchikCaptured then
+    n=n+1
+  end
+
+  if n==4 then
+    local text=string.format("*** VICTORY ***\nAll four red airbases are now in our hand. Well done, blue team!\nRTB and have a beer.")
+    MESSAGE:New(text, 60, nil, true):ToBlue()
+    
+    for _,_wh in pairs(warehouse) do
+      local wh=_wh --Functional.Warehouse#WAREHOUSE
+      wh:_Fireworks()
+    end
+  end
+  
+  return n
+end
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-- Debug
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+if false then
+
+  local SetRedGround=SET_GROUP:New():FilterCategoryGround():FilterCoalitions("red"):FilterOnce()
+  
+  local function DebugDestroyGroup(_group)
+    local group=_group --Wrapper.Group#GROUP
+    group:SmokeBlue()
+    group:Destroy(true, 10)
+  end
+  
+  SetRedGround:ForEachGroup(DebugDestroyGroup)
+
+end
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Events
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-if true then
+-- General event handler.
+eventhandler=EVENTHANDLER:New()
 
-  -- General event handler.
-  eventhandler=EVENTHANDLER:New()
+-- Dead events.
+eventhandler:HandleEvent(EVENTS.Dead)
+eventhandler:HandleEvent(EVENTS.BaseCaptured)
+
+function eventhandler:OnEventBaseCaptured(_EventData)
+  local EventData=_EventData --Core.Event#EVENTDATA
   
-  -- Dead events.
-  eventhandler:HandleEvent(EVENTS.Dead)
-  eventhandler:HandleEvent(EVENTS.BaseCaptured)
 
-  function eventhandler:OnEventBaseCaptured(_EventData)
-    local EventData=_EventData --Core.Event#EVENTDATA
+  if EventData and EventData.Place then
+
+    -- Place is the airbase that was captured.
+    local airbase=EventData.Place --Wrapper.Airbase#AIRBASE
     
-
-    if EventData and EventData.Place then
-
-      -- Place is the airbase that was captured.
-      local airbase=EventData.Place --Wrapper.Airbase#AIRBASE
-      
-      local name=airbase:GetName()
-      
-      env.info(string.format("FPP: airbase %s captured", name))
-      
+    local name=airbase:GetName()
+    
+    local newcoalition=airbase:GetCoalition()
+    local newcoalitionname=airbase:GetCoalitionName()
+    
+    env.info(string.format("FPP: airbase %s captured", name))
+    
+    if name==AIRBASE.Caucasus.Nalchik or name==AIRBASE.Caucasus.Beslan or name==AIRBASE.Caucasus.Mozdok or name==AIRBASE.Caucasus.Mineralnye_Vody then
+      if newcoalition==coalition.side.BLUE then        
+        
+        if name==AIRBASE.Caucasus.Nalchik then
+          nalchikCaptured=true
+        elseif name==AIRBASE.Caucasus.Beslan then
+          beslanCaptured=true
+        elseif name==AIRBASE.Caucasus.Mozdok then
+          mozdokCaptured=true
+        elseif AIRBASE.Caucasus.Mineralnye_Vody then
+          mineralnyeCaptured=true
+        end
+        
+        local n=CheckCapturedRedZones()
+        
+        if n<4 then
+          local text=string.format("Blue forces captured airbase %s. Well done!\n%d red bases remaining.", name, 4-n)
+          MESSAGE:New(text, 30, nil, true):ToCoalition(newcoalition)        
+        end
+        
+      end
     end
     
   end
+  
+end
 
-  function eventhandler:OnEventDead(_EventData)
-    local EventData=_EventData --Core.Event#EVENTDATA
-    
-    -- Name of the dead unit.
-    local unitname=EventData.IniUnitName
-    
-    -- Name of the group.
-    local groupname=EventData.IniGroupName
-    
-    
-    -- Debug
-    env.info(string.format("FPP Event dead of unit %s", tostring(unitname)))
-    
-    -- Try to find a static by this name.
-    local static=STATIC:FindByName(unitname, false)
-    
-    -- Check wheter a static or unit is dead.
-    if static then
-    
-      -- Respawn all statics after 10 min. 
-      static:ReSpawn(nil, 600)
-          
-    else
-    
-      if EventData.IniGroup then
-    
-        -- Number of units in group still alive.    
-        local nalive=EventData.IniGroup:CountAliveUnits()
+function eventhandler:OnEventDead(_EventData)
+  local EventData=_EventData --Core.Event#EVENTDATA
+  
+  -- Name of the dead unit.
+  local unitname=EventData.IniUnitName
+  
+  -- Name of the group.
+  local groupname=EventData.IniGroupName
+  
+  
+  -- Debug
+  env.info(string.format("FPP Event dead of unit %s", tostring(unitname)))
+  
+  -- Try to find a static by this name.
+  local static=STATIC:FindByName(unitname, false)
+  
+  -- Check wheter a static or unit is dead.
+  if static then
+  
+    -- Respawn all statics after 10 min.
+    static:ReSpawn(nil, 600)
         
-        -- Debug.
-        env.info(string.format("FPP Units still alive %d", nalive))
+  else
+  
+    if EventData.IniGroup then
+  
+      -- Number of units in group still alive.    
+      local nalive=EventData.IniGroup:CountAliveUnits()
       
-        -- Respawn Fuel truck on Kobuleti Range after 5 min.
-        if unitname=="Kobuleti X Range Fuel Truck" then
-          BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
-        end
-        
-        -- Respawn SA-10 site after 10 min if one unit is dead.
-        if groupname=="SA-10" then
-          BASE:ScheduleOnce(10*60, GROUP.Respawn, EventData.IniGroup)
-        end
-        
-        -- Respawn air defences of Range Krymsk after 30 min.
-        if groupname:match("SA-15 Krymsk") or groupname:match("SA-8 Krymsk") or groupname:match("Range Krymsk SA-18") then
-          BASE:ScheduleOnce(30*60, GROUP.Respawn, EventData.IniGroup)
-        end        
-        
-        -- Respawn AAA at FARP Skala after 30 min.
-        if groupname:match("Skala ZU-23 Group") then
-          BASE:ScheduleOnce(30*60, GROUP.Respawn, EventData.IniGroup)
-        end
-              
+      -- Debug.
+      env.info(string.format("FPP Units still alive %d", nalive))
+    
+      -- Respawn Fuel truck on Kobuleti Range after 5 min.
+      if unitname=="Kobuleti X Range Fuel Truck" then
+        BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
       end
       
-    end    
-  end
-
+      -- Respawn SA-10 site after 10 min if one unit is dead.
+      if groupname=="SA-10" then
+        BASE:ScheduleOnce(10*60, GROUP.Respawn, EventData.IniGroup)
+      end
+      
+      -- Respawn air defences of Range Krymsk after 30 min.
+      if groupname:match("SA-15 Krymsk") or groupname:match("SA-8 Krymsk") or groupname:match("Range Krymsk SA-18") then
+        BASE:ScheduleOnce(30*60, GROUP.Respawn, EventData.IniGroup)
+      end        
+      
+      -- Respawn AAA at FARP Skala after 30 min.
+      if groupname:match("Skala ZU-23 Group") then
+        BASE:ScheduleOnce(30*60, GROUP.Respawn, EventData.IniGroup)
+      end
+            
+    end
+    
+  end    
 end
+
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
