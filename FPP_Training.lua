@@ -975,7 +975,7 @@ local function zoneScan(_zone)
   for _,_unit in pairs(units) do
     local unit=_unit --Wrapper.Unit#UNIT
     local _coalition=unit:GetCoalition()
-    local category=unit:GetCategory()
+    local category=unit:GetGroup():GetCategory()
     
     if category==Group.Category.GROUND then
       if _coalition==coalition.side.RED then
