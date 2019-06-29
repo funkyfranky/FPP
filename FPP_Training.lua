@@ -1,6 +1,6 @@
 ---------------------------
 -- FPP Practice Script   --
--- v0.9.2 by funkyfranky --
+-- v0.9.3 by funkyfranky --
 ---------------------------
 
 -- Enable/disable modules.
@@ -147,14 +147,14 @@ if Range then
 
   range.Krymsk=RANGE:New("Krymsk")  --Functional.Range#RANGE
   range.Krymsk:SetRangeZone(zone.SAMKrymsk)
-  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #001"):GetCoordinate(), "Bunker 1", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #001"):GetCoordinate(), "Bunker #01", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #002"):GetCoordinate(), "Bunker #02", 50)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #001"):GetCoordinate(), "Tu-22 #01", 50)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #002"):GetCoordinate(), "Tu-22 #02", 50)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #003"):GetCoordinate(), "Tu-22 #03", 50)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Locomotive #001"):GetCoordinate(), "Train", 50)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Tech Combine #001"):GetCoordinate(), "Tech Combine", 50)
-  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #001"):GetCoordinate(), "Bunker #01", 50)
-  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Bunker #002"):GetCoordinate(), "Bunker #02", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Road Outpot #001"):GetCoordinate(), "Road Outpost", 50)
   
   
   -- Start ranges.
@@ -287,6 +287,7 @@ if Warehouse then
   warehouse.beslan      = WAREHOUSE:New(STATIC:FindByName("Warehouse Beslan"))         --Functional.Warehouse#WAREHOUSE
   warehouse.nalchik     = WAREHOUSE:New(STATIC:FindByName("Warehouse Nalchik"))        --Functional.Warehouse#WAREHOUSE
   warehouse.mozdok      = WAREHOUSE:New(STATIC:FindByName("Warehouse Mozdok"))         --Functional.Warehouse#WAREHOUSE
+  warehouse.mineralnye  = WAREHOUSE:New(STATIC:FindByName("Warehouse Mineralnye"))     --Functional.Warehouse#WAREHOUSE
   warehouse.krymsk      = WAREHOUSE:New(STATIC:FindByName("Warehouse Krymsk"))         --Functional.Warehouse#WAREHOUSE
   warehouse.skala       = WAREHOUSE:New(STATIC:FindByName("Skala Command Post"))       --Functional.Warehouse#WAREHOUSE
   
@@ -294,10 +295,15 @@ if Warehouse then
   for _,_warehouse in pairs(warehouse) do
     local wh=_warehouse --Functional.Warehouse#WAREHOUSE
     wh:SetReportOff()
-    wh:SetRespawnAfterDestroyed(60)
+    --wh:SetRespawnAfterDestroyed(60)
     wh:Start()
     --wh:GetCoordinate():Explosion(50000, math.random(10,30))
   end
+  
+  --warehouse.maykop:Start()
+  --warehouse.maykop.Debug=true
+  --BASE:TraceClass("WAREHOUSE")
+  --BASE:TraceOnOff(true)
   
   -------------
   -- Tbilisi --
@@ -612,6 +618,10 @@ if Warehouse then
     warehouse.maykop:__AddRequest((i-1)*30, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
   end
   
+  local function _DoneRTB()
+  
+  end
+  
   function warehouse.maykop:OnAfterSelfRequest(From,Event,To,groupset,request)
     
     local assignment=self:GetAssignment(request)
@@ -620,17 +630,27 @@ if Warehouse then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
         
+        local angels=math.random(10,15)
+        
         local speed=UTILS.KnotsToMps(300)
-        local altitude=UTILS.FeetToMeters(10000)
+        local altitude=UTILS.FeetToMeters(angels*1000)
         
         local c1=zone.Maykop:GetRandomCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
         local c2=c1:Translate(UTILS.NMToMeters(10), 180):SetAltitude(altitude)
                 
         local taskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
         
+        local flagname=group:GetName().."_RTB"
+        local userflag=USERFLAG:New(flagname)
+        userflag:Set(100)
+        
+        local taskCond=group:TaskCondition(nil,flagname, 666, nil, nil, nil)
+        local taskCont=group:TaskControlled(taskOrbit, taskCond)
+        
         local wp={}
         wp[1]=warehouse.maykop:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {taskOrbit}, "Orbit")
+        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {taskCont}, "Orbit")
+        wp[3]=warehouse.maykop:GetAirbase():GetCoordinate():WaypointAirLanding(300, warehouse.maykop:GetAirbase(), {}, "Landing")
         
         group:StartUncontrolled()
         
@@ -649,9 +669,33 @@ if Warehouse then
     local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem
     local assignment=self:GetAssignment(request)
     
+    env.info(string.format("FF maykop delivered assignment %s",assignment))
+    
     -- Spawn new drone if one returned, e.g. because out of fuel.
     if assignment=="Drone" then
       warehouse.maykop:AddRequest(warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
+    end
+  
+  end
+  
+  --- Function called when an asset runs low on fuel, i.e. < 15 %.
+  function warehouse.maykop:OnAfterAssetLowFuel(From,Event,To,_asset,_request)
+    local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem
+    local asset=_asset --Functional.Warehouse#WAREHOUSE.Assetitem
+    local assignment=self:GetAssignment(request)
+    
+    -- TODO Bit clumsy here. Need to introduce a function for the class.
+    local groupname=self:_alias(asset.unittype, self.uid, asset.uid, request.uid)
+    
+    env.info(string.format("FF maykop low fuel assignment %s of group %s", assignment, groupname))
+    
+    -- Spawn new drone if one returned, e.g. because out of fuel.
+    if assignment=="Drone" then
+      
+      local flagname=groupname.."_RTB"
+      env.info(string.format("FF maykop group %s out of fuel ==> RTB", groupname))
+      local userflag=USERFLAG:New(flagname)
+      userflag:Set(666)
     end
   
   end
@@ -661,9 +705,11 @@ if Warehouse then
     local asset=_asset     --Functional.Warehouse#WAREHOUSE.Assetitem
     local request=_request --Functional.Warehouse#WAREHOUSE.Queueitem
     
+    env.info(string.format("FF maykop asset dead assignment %s",request.assignment))
+    
     -- Spawn new drone if one was shot down.
     if request.assignment=="Drone" then
-      warehouse.maykop:AddRequest(warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, request.assignment)
+      --warehouse.maykop:AddRequest(warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, request.assignment)
     end
   end
   
@@ -1191,8 +1237,10 @@ function eventhandler:OnEventDead(_EventData)
   -- Check wheter a static or unit is dead.
   if static then
   
-    -- Respawn all statics after 10 min.
-    static:ReSpawn(nil, 600)
+    -- Respawn all statics after 10 min. Warehouses are not respawned.
+    if not unitname:match("Warehouse") then
+      static:ReSpawn(nil, 600)
+    end
         
   else
   
