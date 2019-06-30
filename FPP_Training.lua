@@ -154,7 +154,7 @@ if Range then
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Krymsk Range Tu-22 #003"):GetCoordinate(), "Tu-22 #03", 50)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Locomotive #001"):GetCoordinate(), "Train", 50)
   range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Tech Combine #001"):GetCoordinate(), "Tech Combine", 50)
-  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Road Outpot #001"):GetCoordinate(), "Road Outpost", 50)
+  range.Krymsk:AddBombingTargetCoordinate(STATIC:FindByName("Range Krymsk Road Outpost #001"):GetCoordinate(), "Road Outpost", 50)
   
   
   -- Start ranges.
@@ -171,7 +171,7 @@ if Range then
   
   arty.MstaKobuleti=ARTY:New(group) --Functional.Artillery#ARTY
   
-  arty.MstaKobuleti:SetRespawnOnDeath(60)
+  arty.MstaKobuleti:SetRespawnOnDeath(10*60)
   
   arty.MstaKobuleti:SetReportOFF()
   
@@ -186,7 +186,7 @@ if Range then
 
   function arty.MstaKobuleti:OnAfterCeaseFire(Controllable,From,Event,To,Target)
     --local target=Target --Functional.Artillery#ARTY.Target
-    local clock=UTILS.SecondsToClock(timer.getAbsTime()+60)
+    local clock=UTILS.SecondsToClock(timer.getAbsTime()+5*60)
     arty.MstaKobuleti:AssignTargetCoord(target, 50, 500, 10, 1, clock)
   end
     
@@ -431,6 +431,20 @@ if Warehouse then
     group:SetTask(TaskCombo, 1)
   end
   
+  --- Function to make a group lase a coordinate.
+  function LaseReaper(_group)
+    local group=_group --Wrapper.Group#GROUP
+    local reaper=group:GetUnit(1)
+    
+    local coord=zone.KobuletiRangeTechCombine:GetCoordinate()
+    
+    env.info("FPP: Reaper starts to lase!")
+    
+    MESSAGE:New("Reaper on station. Lasing target at Kobuleti Range on laser code 1704.", 20):ToBlue()
+    
+    reaper:LaseCoordinate(coord, 1704)
+  end
+  
   --- Reaper setup.
   local function StartReaper(_group)
     local group=_group --Wrapper.Group#GROUP
@@ -445,10 +459,12 @@ if Warehouse then
     -- Orbit in race track pattern.
     local TaskOrbit=group:TaskOrbit(c1, altitude, speed)
     
+    local TaskFuncLase=group:TaskFunction("LaseReaper")
+    
     local wp={}
     wp[1]=warehouse.kobuleti:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{TaskOrbit}, "Reaper")
-    
+    wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed),{TaskFuncLase, TaskOrbit}, "Reaper")
+        
     group:StartUncontrolled()
             
     local TaskRoute=group:TaskRoute(wp)
@@ -611,8 +627,8 @@ if Warehouse then
     warehouse.maykop:AddAsset(drone, 50)
   end
   
-  -- Launch eight drones.
-  for i=1,8 do
+  -- Launch six drones.
+  for i=1,6 do
     local r=math.random(2)
     local drone=drones[r]
     warehouse.maykop:__AddRequest((i-1)*30, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
@@ -669,11 +685,11 @@ if Warehouse then
     local request=_request --Functional.Warehouse#WAREHOUSE.Pendingitem
     local assignment=self:GetAssignment(request)
     
-    env.info(string.format("FF maykop delivered assignment %s",assignment))
+    env.info(string.format("FPP Maykop delivered asset with assignment %s", assignment))
     
     -- Spawn new drone if one returned, e.g. because out of fuel.
     if assignment=="Drone" then
-      warehouse.maykop:AddRequest(warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
+      warehouse.maykop:__AddRequest(30, warehouse.maykop, request.assetdesc, request.assetdescval, 1, nil, nil, nil, assignment)
     end
   
   end
@@ -687,13 +703,11 @@ if Warehouse then
     -- TODO Bit clumsy here. Need to introduce a function for the class.
     local groupname=self:_alias(asset.unittype, self.uid, asset.uid, request.uid)
     
-    env.info(string.format("FF maykop low fuel assignment %s of group %s", assignment, groupname))
-    
     -- Spawn new drone if one returned, e.g. because out of fuel.
     if assignment=="Drone" then
       
       local flagname=groupname.."_RTB"
-      env.info(string.format("FF maykop group %s out of fuel ==> RTB", groupname))
+      env.info(string.format("FPP Maykop group %s out of fuel ==> RTB", groupname))
       local userflag=USERFLAG:New(flagname)
       userflag:Set(666)
     end
@@ -703,9 +717,11 @@ if Warehouse then
   --- Function called when an asset group is dead.
   function warehouse.maykop:OnAfterAssetDead(From,Event,To,_asset,_request)
     local asset=_asset     --Functional.Warehouse#WAREHOUSE.Assetitem
-    local request=_request --Functional.Warehouse#WAREHOUSE.Queueitem
+    local request=_request --Functional.Warehouse#WAREHOUSE.Queueitem    
     
-    env.info(string.format("FF maykop asset dead assignment %s",request.assignment))
+    local groupname=self:_alias(asset.unittype, self.uid, asset.uid, request.uid)
+    
+    env.info(string.format("FPP Maykop group %s dead! Assignment %s", groupname, request.assignment))
     
     -- Spawn new drone if one was shot down.
     if request.assignment=="Drone" then
@@ -739,7 +755,6 @@ if Warehouse then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
         local speed=group:GetSpeedMax()*0.5
-        env.info(string.format("FPP Group %s Patrol Speed = %.1f km/h", group:GetName(), speed))
         group:PatrolZones({zone.Skala}, speed, "Custom")
       end
     end
@@ -747,56 +762,6 @@ if Warehouse then
   
   --local gaz66=STATIC:FindByName("Skala GAZ-66")
   --gaz66:GetCoordinate():Explosion(40, 10)
-  
-  ------------------------------
-  -- Kutaisi Range Ammo Depot --
-  ------------------------------
-
-  --[[
-  
-  -- Set spawn zone.
-  warehouse.kutaisiAmmo:SetSpawnZone(zone.kutaisiAmmoDepotSpawn)
-  
-  -- Add assets.
-  warehouse.kutaisiAmmo:AddAsset("Infantry Rus Group 5", 20)
-  warehouse.kutaisiAmmo:AddAsset("SA-18 Manpad Group", 20)
-  warehouse.kutaisiAmmo:AddAsset("SA-18 Manpad Group", 20)
-  
-  -- Spawn some infantry and manpads.
-  warehouse.kutaisiAmmo:AddRequest(warehouse.kutaisiAmmo, WAREHOUSE.Descriptor.GROUPNAME, "Infantry Rus Group 5", 3, nil, nil, nil, "Patrol")
-  warehouse.kutaisiAmmo:AddRequest(warehouse.kutaisiAmmo, WAREHOUSE.Descriptor.GROUPNAME, "SA-18 Manpad Group", 3, nil, nil, nil, "Patrol")
-  
-
-  function warehouse.kutaisiAmmo:OnAfterSelfRequest(From,Event,To,groupset,request)
-    
-    local assignment=self:GetAssignment(request)
-    
-    if assignment=="Patrol" then
-      for _,_group in pairs(groupset:GetSet()) do
-        local group=_group --Wrapper.Group#GROUP
-        local speed=group:GetSpeedMax()*0.5
-        env.info(string.format("FPP Group %s Patrol Speed = %.1f km/h", group:GetName(), speed))
-        group:PatrolZones({zone.kutaisirange}, speed, "Custom")
-      end
-    end
-    
-  end
-  
-  -- Respawn after asset is dead.
-  function warehouse.kutaisiAmmo:OnAfterAssetDead(From,Event,To,asset,request)
-    warehouse.kutaisiAmmo:AddRequest(warehouse.kutaisiAmmo, request.assetdesc, request.assetdescval, 1, nil, nil, nil, request.assignment)
-  end
-  
-  -- Respawn and re-add assets after warehouse was destroyed.
-  function warehouse.kutaisiAmmo:OnAfterDestroyed(From,Event,To)
-  
-    -- Add assets.
-    warehouse.kutaisiAmmo:AddAsset("Infantry Rus Group 5", 20)
-    warehouse.kutaisiAmmo:AddAsset("SA-18 Manpad Group", 20)
-  
-  end
-  
-  ]]
   
 end
 
@@ -881,7 +846,7 @@ if Stennis then
   local AirbossStennis=AIRBOSS:New("USS Stennis")
   
   -- Add recovery windows:
-  local window1=AirbossStennis:AddRecoveryWindow(  "7:30",  "8:30", 1, nil, true, 25, true)
+  local window1=AirbossStennis:AddRecoveryWindow(  "6:30",  "8:30", 1, nil, true, 25, true)
   local window2=AirbossStennis:AddRecoveryWindow(  "9:30", "10:30", 1, nil, true, 25, true)
   local window3=AirbossStennis:AddRecoveryWindow( "11:30", "12:30", 1, nil, true, 25, true)
   local window4=AirbossStennis:AddRecoveryWindow( "13:30", "14:30", 1, nil, true, 25, true)
@@ -946,6 +911,9 @@ if A2AD then
   -- Enable the tactical display panel.
   A2ADispatcher:SetTacticalDisplay(false)
   
+  -- Despawn on landing to keep airbase clean.
+  A2ADispatcher:SetDefaultLanding(AI_A2A_DISPATCHER.Landing.AtRunway)
+  
   -- Initialize the dispatcher, setting up a border zone. Any enemy crossing this border will be engaged.  
   A2ADispatcher:SetBorderZone(zone.CCCPboarder)
   
@@ -969,6 +937,7 @@ if A2AD then
     A2ADispatcher:SetSquadronOverhead(squadron, 1.0)
     A2ADispatcher:SetSquadronGrouping(squadron, 2)
     A2ADispatcher:SetSquadronTakeoff(squadron, AI_A2A_DISPATCHER.Takeoff.Hot)
+    A2ADispatcher:SetSquadronLanding(squadron, AI_A2A_DISPATCHER.Landing.AtRunway)
     A2ADispatcher:SetSquadronCapInterval(squadron, 2, 180, 360, 1)
     A2ADispatcher:SetSquadronGci(squadron, 900, 1200)
   end
@@ -1044,10 +1013,10 @@ local function CheckZones()
   local nRedMineralnye,nBlueMineralnye=zoneScan(zone.Mineralnye)
   
   -- Debug info.
-  env.info(string.format("FF Units Beslan: nRed=%d nBlue=%d", nRedBeslan, nBlueBeslan))
-  env.info(string.format("FF Units Nalchik: nRed=%d nBlue=%d", nRedNalchik, nBlueNalchik))
-  env.info(string.format("FF Units Mineralnye: nRed=%d nBlue=%d", nRedMineralnye, nBlueMineralnye))
-  env.info(string.format("FF Units Mozdok: nRed=%d nBlue=%d", nRedMozdok, nBlueMozdok))
+  env.info(string.format("FPP Units Beslan: nRed=%d nBlue=%d", nRedBeslan, nBlueBeslan))
+  env.info(string.format("FPP Units Nalchik: nRed=%d nBlue=%d", nRedNalchik, nBlueNalchik))
+  env.info(string.format("FPP Units Mineralnye: nRed=%d nBlue=%d", nRedMineralnye, nBlueMineralnye))
+  env.info(string.format("FPP Units Mozdok: nRed=%d nBlue=%d", nRedMozdok, nBlueMozdok))
   
   local text=""
   
@@ -1257,9 +1226,9 @@ function eventhandler:OnEventDead(_EventData)
         BASE:ScheduleOnce(5*60, GROUP.Respawn, EventData.IniGroup)
       end
       
-      -- Respawn SA-10 site after 10 min if one unit is dead.
+      -- Respawn SA-10 site after 15 min if one unit is dead.
       if groupname=="SA-10" then
-        BASE:ScheduleOnce(10*60, GROUP.Respawn, EventData.IniGroup)
+        BASE:ScheduleOnce(15*60, GROUP.Respawn, EventData.IniGroup)
       end
       
       -- Respawn air defences of Range Krymsk after 30 min.
