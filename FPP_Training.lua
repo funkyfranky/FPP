@@ -1,6 +1,6 @@
 ---------------------------
 -- FPP Practice Script   --
--- v0.9.3 by funkyfranky --
+-- v0.9.4 by funkyfranky --
 ---------------------------
 
 -- Enable/disable modules.
@@ -299,12 +299,7 @@ if Warehouse then
     wh:Start()
     --wh:GetCoordinate():Explosion(50000, math.random(10,30))
   end
-  
-  --warehouse.maykop:Start()
-  --warehouse.maykop.Debug=true
-  --BASE:TraceClass("WAREHOUSE")
-  --BASE:TraceOnOff(true)
-  
+      
   -------------
   -- Tbilisi --
   -------------
@@ -334,7 +329,7 @@ if Warehouse then
     local group=_group --Wrapper.Group#GROUP
     
     -- Set speed and altitude.
-    local speed=UTILS.KnotsToMps(350)
+    local speed=UTILS.KnotsToMps(420)
     local altitude=UTILS.FeetToMeters(25000)
     
     -- Race-track orbit of 50 NM length.
@@ -481,8 +476,8 @@ if Warehouse then
   warehouse.kobuleti:AddAsset("KC-135 Group", 2)
   warehouse.kobuleti:AddAsset("Reaper Group", 2)
   
-  -- Set low fuel to 6%.
-  warehouse.kobuleti:SetLowFuelThreshold(0.06)
+  -- Set low fuel to 10%.
+  warehouse.kobuleti:SetLowFuelThreshold(0.10)
 
   
   -- Self request AWACS.
@@ -620,32 +615,39 @@ if Warehouse then
   ------------
   -- Maykop --
   ------------
+
+  -- Safe parking at on (TO_AC parameter in getParking function).
+  warehouse.maykop:SetSafeParkingOn()
+
+  -- RTB when fuel <= 25%.
+  warehouse.maykop:SetLowFuelThreshold(0.25)
   
-  local drones={"MiG-21 Group", "MiG-19 Group"}
+  -- Template group names table.
+  local drones={"MiG-21 Group", "MiG-23 Group", "MiG-25 Group"}
   
+  -- Add 50 aircraft of random type.
   for _,drone in pairs(drones) do
     warehouse.maykop:AddAsset(drone, 50)
   end
   
   -- Launch six drones.
   for i=1,6 do
-    local r=math.random(2)
+    local r=math.random(#drones)
     local drone=drones[r]
-    warehouse.maykop:__AddRequest((i-1)*30, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
+    warehouse.maykop:__AddRequest(i*60, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
   end
   
-  local function _DoneRTB()
-  
-  end
-  
+  --- Function called after spawning a drone.
   function warehouse.maykop:OnAfterSelfRequest(From,Event,To,groupset,request)
     
+    -- Get assignment.
     local assignment=self:GetAssignment(request)
     
     if assignment=="Drone" then
       for _,_group in pairs(groupset:GetSet()) do
         local group=_group --Wrapper.Group#GROUP
         
+        -- Random altitude between angels 10 and 15.
         local angels=math.random(10,15)
         
         local speed=UTILS.KnotsToMps(300)
@@ -654,6 +656,8 @@ if Warehouse then
         local c1=zone.Maykop:GetRandomCoordinate():SetAltitude(altitude) --Core.Point#COORDINATE
         local c2=c1:Translate(UTILS.NMToMeters(10), 180):SetAltitude(altitude)
                 
+        -- Enroute task to engage aircraft in Maykop zone.
+        local taskEngageInZone=group:EnRouteTaskEngageTargetsInZone(zone.Maykop:GetVec2(), zone.Maykop:GetRadius(), {"Air"}, 0)
         local taskOrbit=group:TaskOrbit(c1, altitude, speed,c2)
         
         local flagname=group:GetName().."_RTB"
@@ -665,8 +669,8 @@ if Warehouse then
         
         local wp={}
         wp[1]=warehouse.maykop:GetAirbase():GetCoordinate():WaypointAirTakeOffParking(nil, 300)
-        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {taskCont}, "Orbit")
-        wp[3]=warehouse.maykop:GetAirbase():GetCoordinate():WaypointAirLanding(300, warehouse.maykop:GetAirbase(), {}, "Landing")
+        wp[2]=c1:WaypointAirTurningPoint(nil, UTILS.MpsToKmph(speed), {taskEngageInZone, taskCont}, "Orbit")
+        wp[3]=warehouse.maykop:GetAirbase():GetCoordinate():WaypointAirLanding(400, warehouse.maykop:GetAirbase(), {}, "Landing")
         
         group:StartUncontrolled()
         
@@ -921,10 +925,10 @@ if A2AD then
   A2ADispatcher:SetEngageRadius(120000)
   
   -- Setup the squadrons.
-  A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27"},    10)
-  A2ADispatcher:SetSquadron("Nalchik",    AIRBASE.Caucasus.Nalchik,         {"SQ CCCP MIG-25PD"}, 10)
-  A2ADispatcher:SetSquadron("Beslan",     AIRBASE.Caucasus.Beslan,          {"SQ CCCP MIG-25PD"}, 10)
-  A2ADispatcher:SetSquadron("Mozdok",     AIRBASE.Caucasus.Mozdok,          {"SQ CCCP MIG-31"},   20)
+  A2ADispatcher:SetSquadron("Mineralnye", AIRBASE.Caucasus.Mineralnye_Vody, {"SQ CCCP SU-27"},    6)
+  A2ADispatcher:SetSquadron("Nalchik",    AIRBASE.Caucasus.Nalchik,         {"SQ CCCP MIG-25PD"}, 6)
+  A2ADispatcher:SetSquadron("Beslan",     AIRBASE.Caucasus.Beslan,          {"SQ CCCP MIG-25PD"}, 4)
+  A2ADispatcher:SetSquadron("Mozdok",     AIRBASE.Caucasus.Mozdok,          {"SQ CCCP MIG-31"},   10)
   
   local Squadrons={"Mineralnye", "Mozdok", "Beslan", "Nalchik"}
   
@@ -936,9 +940,11 @@ if A2AD then
   for _,squadron in pairs(Squadrons) do
     A2ADispatcher:SetSquadronOverhead(squadron, 1.0)
     A2ADispatcher:SetSquadronGrouping(squadron, 2)
-    A2ADispatcher:SetSquadronTakeoff(squadron, AI_A2A_DISPATCHER.Takeoff.Hot)
-    A2ADispatcher:SetSquadronLanding(squadron, AI_A2A_DISPATCHER.Landing.AtRunway)
-    A2ADispatcher:SetSquadronCapInterval(squadron, 2, 180, 360, 1)
+    --A2ADispatcher:SetSquadronTakeoff(squadron, AI_A2A_DISPATCHER.Takeoff.Hot)
+    A2ADispatcher:SetSquadronTakeoffFromParkingHot(squadron)
+    --A2ADispatcher:SetSquadronLanding(squadron, AI_A2A_DISPATCHER.Landing.AtRunway)
+    A2ADispatcher:SetSquadronLandingAtEngineShutdown(squadron)
+    A2ADispatcher:SetSquadronCapInterval(squadron, 1, 180, 360, 1)
     A2ADispatcher:SetSquadronGci(squadron, 900, 1200)
   end
   
