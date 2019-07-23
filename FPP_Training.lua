@@ -1,6 +1,6 @@
 ---------------------------
 -- FPP Practice Script   --
--- v0.9.4 by funkyfranky --
+-- v0.9.5 by funkyfranky --
 ---------------------------
 
 -- Enable/disable modules.
@@ -14,6 +14,23 @@ local Scoring=false
 
 -- No MOOSE settings menu.
 _SETTINGS:SetPlayerMenuOff()
+
+-- Restart after 4h.
+local restart=4*60*60
+local restarttimes={}
+restarttimes["20 minutes"]=restart-20*60
+restarttimes["10 minutes"]=restart-10*60
+restarttimes["5 minutes"]=restart-5*60
+restarttimes["1 minute"]=restart-1*60
+
+local function RestartMessage(minutes)
+  local text=string.format("Server is restarting in %s.", minutes)
+  MESSAGE:New(text, 30, "INFO"):ToAll()
+end
+
+for minutes,rt in pairs(restarttimes) do
+  BASE:ScheduleOnce(rt, RestartMessage, minutes)
+end
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- Zones
@@ -50,10 +67,13 @@ zone.Nalchik=ZONE:New("Zone Nalchik")       --Core.Zone#ZONE
 zone.Beslan=ZONE:New("Zone Beslan")         --Core.Zone#ZONE
 zone.Mineralnye=ZONE:New("Zone Mineralnye") --Core.Zone#ZONE
 
--- Red border.
-zone.CAPwest=ZONE_POLYGON:New("CAP Zone West", GROUP:FindByName("CAP Zone West")) --Core.Zone#ZONE_POLYGON
-zone.CAPeast=ZONE_POLYGON:New("CAP Zone East", GROUP:FindByName("CAP Zone East")) --Core.Zone#ZONE_POLYGON
-zone.CCCPboarder=ZONE_POLYGON:New("CCCP Border", GROUP:FindByName("CCCP Border")) --Core.Zone#ZONE_POLYGON
+-- Red border and CAP zones.
+zone.CAPwest    = ZONE_POLYGON:New("CAP Zone West",    GROUP:FindByName("CAP Zone West"))    --Core.Zone#ZONE_POLYGON
+zone.CAPeast    = ZONE_POLYGON:New("CAP Zone East",    GROUP:FindByName("CAP Zone East"))    --Core.Zone#ZONE_POLYGON
+zone.CAPbeslan  = ZONE_POLYGON:New("CAP Zone Beslan",  GROUP:FindByName("CAP Zone Beslan"))  --Core.Zone#ZONE_POLYGON
+zone.CAPnalchik = ZONE_POLYGON:New("CAP Zone Nalchik", GROUP:FindByName("CAP Zone Nalchik")) --Core.Zone#ZONE_POLYGON
+zone.CAPmozdok  = ZONE_POLYGON:New("CAP Zone Mozdok",  GROUP:FindByName("CAP Zone Mozdok"))  --Core.Zone#ZONE_POLYGON
+zone.CCCPboarder= ZONE_POLYGON:New("CCCP Border",      GROUP:FindByName("CCCP Border"))      --Core.Zone#ZONE_POLYGON
 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -634,7 +654,7 @@ if Warehouse then
   for i=1,6 do
     local r=math.random(#drones)
     local drone=drones[r]
-    warehouse.maykop:__AddRequest(i*60, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
+    warehouse.maykop:__AddRequest(i*3*60, warehouse.maykop, WAREHOUSE.Descriptor.GROUPNAME, drone, 1, nil, nil, nil, "Drone")
   end
   
   --- Function called after spawning a drone.
@@ -932,10 +952,17 @@ if A2AD then
   
   local Squadrons={"Mineralnye", "Mozdok", "Beslan", "Nalchik"}
   
-  A2ADispatcher:SetSquadronCap("Mineralnye", zone.CAPwest, 6000, 12000, 500, 600, 800, 1100, "BARO")
-  A2ADispatcher:SetSquadronCap("Mozdok",     zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
-  A2ADispatcher:SetSquadronCap("Nalchik",    zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
-  A2ADispatcher:SetSquadronCap("Beslan",     zone.CAPeast, 6000, 12000, 600, 800, 800, 1200, "BARO")
+  -- CAP zones.
+  A2ADispatcher:SetSquadronCap("Mineralnye", zone.CAPwest,    UTILS.FeetToMeters(10000), UTILS.FeetToMeters(20000), UTILS.KnotsToKmph(350), UTILS.KnotsToKmph(400), 800, 1100, "BARO")
+  A2ADispatcher:SetSquadronCap("Mozdok",     zone.CAPmozdok,  UTILS.FeetToMeters(10000), UTILS.FeetToMeters(20000), UTILS.KnotsToKmph(350), UTILS.KnotsToKmph(400), 800, 1100, "BARO")
+  A2ADispatcher:SetSquadronCap("Nalchik",    zone.CAPnalchik, UTILS.FeetToMeters(10000), UTILS.FeetToMeters(20000), UTILS.KnotsToKmph(350), UTILS.KnotsToKmph(400), 800, 1100, "BARO")
+  A2ADispatcher:SetSquadronCap("Beslan",     zone.CAPbeslan,  UTILS.FeetToMeters(10000), UTILS.FeetToMeters(20000), UTILS.KnotsToKmph(350), UTILS.KnotsToKmph(400), 800, 1100, "BARO")
+  
+  -- CAP race track pattern.
+  A2ADispatcher:SetSquadronCapRacetrack("Mineralnye", nil, nil, 90, 270, 20*60, 30*60)
+  A2ADispatcher:SetSquadronCapRacetrack("Mozdok",     nil, nil, 90, 270, 20*60, 30*60)
+  A2ADispatcher:SetSquadronCapRacetrack("Nalchik",    nil, nil, 90, 180, 20*60, 30*60)
+  A2ADispatcher:SetSquadronCapRacetrack("Beslan",     nil, nil, 90, 180, 20*60, 30*60)
   
   for _,squadron in pairs(Squadrons) do
     A2ADispatcher:SetSquadronOverhead(squadron, 1.0)
