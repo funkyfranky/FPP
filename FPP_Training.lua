@@ -1,6 +1,6 @@
 ---------------------------
 -- FPP Practice Script   --
--- v0.9.5 by funkyfranky --
+-- v0.9.6 by funkyfranky --
 ---------------------------
 
 -- Enable/disable modules.
@@ -1265,7 +1265,7 @@ function eventhandler:OnEventDead(_EventData)
       end
       
       -- Respawn air defences of Range Krymsk after 30 min.
-      if groupname:match("SA-15 Krymsk") or groupname:match("SA-8 Krymsk") or groupname:match("Range Krymsk SA-18") then
+      if groupname:match("SA-15 Krymsk") or groupname:match("SA-8 Krymsk") or groupname:match("Range Krymsk SA-18") or groupname:match("SA-11 Krymsk") or groupname:match("SA-6 Krymsk") then
         BASE:ScheduleOnce(30*60, GROUP.Respawn, EventData.IniGroup)
       end        
       
